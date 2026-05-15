@@ -1,0 +1,232 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  username      String    @unique
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  bio           String?
+  role          Role      @default(USER)
+  reputation    Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  threads          Thread[]
+  posts            Post[]
+  likes            Like[]
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  orders           Order[]        @relation("BuyerOrders")
+  sales            Order[]        @relation("SellerOrders")
+  listings         Listing[]
+  favorites        Favorite[]
+  notifications    Notification[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  threads     Thread[]
+  createdAt   DateTime @default(now())
+}
+
+model Thread {
+  id         String   @id @default(cuid())
+  title      String
+  content    String
+  authorId   String
+  categoryId String
+  views      Int      @default(0)
+  isPinned   Boolean  @default(false)
+  isLocked   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  author    User        @relation(fields: [authorId], references: [id])
+  category  Category    @relation(fields: [categoryId], references: [id])
+  posts     Post[]
+  likes     Like[]
+  tags      ThreadTag[]
+  favorites Favorite[]
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  threadId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User   @relation(fields: [authorId], references: [id])
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  likes  Like[]
+}
+
+model Tag {
+  id      String      @id @default(cuid())
+  name    String      @unique
+  color   String?
+  threads ThreadTag[]
+}
+
+model ThreadTag {
+  threadId String
+  tagId    String
+  thread   Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([threadId, tagId])
+}
+
+model Like {
+  id       String  @id @default(cuid())
+  userId   String
+  threadId String?
+  postId   String?
+
+  user   User    @relation(fields: [userId], references: [id])
+  thread Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+  @@unique([userId, postId])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  content    String
+  senderId   String
+  receiverId String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  sellerId    String
+  status      ListingStatus @default(ACTIVE)
+  images      String[]
+  category    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  seller User    @relation(fields: [sellerId], references: [id])
+  orders Order[]
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  listingId String
+  buyerId   String
+  sellerId  String
+  status    OrderStatus @default(PENDING)
+  price     Float
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  listing Listing @relation(fields: [listingId], references: [id])
+  buyer   User    @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller  User    @relation("SellerOrders", fields: [sellerId], references: [id])
+}
+
+model Favorite {
+  id       String @id @default(cuid())
+  userId   String
+  threadId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  INACTIVE
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum NotificationType {
+  REPLY
+  LIKE
+  MESSAGE
+  ORDER
+  SYSTEM
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
