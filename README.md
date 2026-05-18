@@ -42,9 +42,9 @@ AUTH_SECRET="ваш_секретный_ключ_для_nextauth"
 
 Примените схему базы данных:
 
-
 npx prisma db push
 npx prisma generate
+
 Запустите сервер разработки:
 
 npm run dev
