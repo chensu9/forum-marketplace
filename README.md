@@ -47,4 +47,4 @@ npx prisma generate
 
 Запустите сервер разработки:
 
-npm run dev
+npm run dev eoir
