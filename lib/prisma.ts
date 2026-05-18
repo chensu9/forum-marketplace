@@ -1,19 +1,23 @@
+// lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+// 1. Создаем пул соединений PostgreSQL
+const connectionString = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString });
 
-function createPrismaClient() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  });
-  const adapter = new PrismaPg(pool);
-  return new PrismaClient({ adapter });
+// 2. Создаем адаптер для Prisma
+const adapter = new PrismaPg(pool);
+
+// 3. Сохраняем PrismaClient в глобальном объекте (защита от утечек памяти в Next.js dev mode)
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+
+// 4. Передаем адаптер в конструктор
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({ adapter });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
 }
-
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
