@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Современная гибридная платформа, объединяющая в себе функционал классического форума для общения и полноценного маркетплейса для безопасной торговли между пользователями. Проект выполнен в минималистичном карточном дизайне с тёмной темой и фиолетовыми акцентами.
 
-## Getting Started
+## 🚀 Ключевые возможности
 
-First, run the development server:
+**💬 Форум и Социальная часть**
+* **Умная лента постов:** Создание тем с привязкой к тегам.
+* **Оптимистичный UI:** Мгновенная система лайков без перезагрузки страницы.
+* **Умные просмотры:** Защита от накрутки просмотров на базе локальной памяти браузера.
+* **Профили пользователей:** Индивидуальные страницы с историей активности, биографией и динамически рассчитываемой репутацией (по формуле на базе лайков и количества тем).
+* **Система комментариев:** Возможность обсуждать посты прямо в карточке темы.
 
-```bash
+**🛒 Встроенный Маркетплейс**
+* **Публикация объявлений:** Пользователи могут размещать свои товары или услуги с указанием цены и описания.
+* **Безопасные сделки:** Разделение ролей на покупателя и продавца с защитой от "самовыкупа".
+* **Управление заказами:** Удобный дашборд ("Мои покупки" и "Мои продажи").
+* **Статусы заказов:** Интерактивное управление статусами сделки (Ожидает, В работе, Завершён, Отменён).
+
+## 🛠 Технический стек
+
+* **Фреймворк:** Next.js 15 (App Router, Server Actions)
+* **База данных:** PostgreSQL + Prisma ORM (с использованием `@prisma/adapter-pg`)
+* **Авторизация:** NextAuth.js v5 (JWT-стратегия + кастомная валидация)
+* **Безопасность:** Хеширование паролей (`bcryptjs`)
+* **Стилизация:** Tailwind CSS 
+
+## ⚙️ Установка и запуск локально
+
+1. Склонируйте репозиторий:
+   ```bash
+   git clone [https://github.com/ВАШ_НИКНЕЙМ/nexusboard.git](https://github.com/ВАШ_НИКНЕЙМ/nexusboard.git)
+Установите зависимости:
+
+
+npm install
+
+Создайте файл .env в корне проекта и добавьте переменные окружения:
+
+Фрагмент кода
+
+DATABASE_URL="ваш_url_к_базе_данных_postgresql"
+AUTH_SECRET="ваш_секретный_ключ_для_nextauth"
+
+Примените схему базы данных:
+
+
+npx prisma db push
+npx prisma generate
+Запустите сервер разработки:
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
