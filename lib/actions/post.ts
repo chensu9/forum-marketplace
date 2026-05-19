@@ -6,6 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+// ==========================================
+// СОЗДАНИЕ ПОСТА
+// ==========================================
 export async function createPost(formData: FormData) {
   // 1. Проверяем, авторизован ли пользователь
   const session = await auth();
@@ -45,6 +48,39 @@ export async function createPost(formData: FormData) {
   });
 
   // 5. Обновляем кэш главной страницы и перекидываем пользователя туда
+  revalidatePath("/");
+  redirect("/");
+}
+
+
+// ==========================================
+// УДАЛЕНИЕ ПОСТА
+// ==========================================
+export async function deletePost(postId: string) {
+  const session = await auth();
+  
+  if (!session?.user) {
+    throw new Error("UNAUTHORIZED");
+  }
+
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+  });
+
+  if (!post) throw new Error("POST_NOT_FOUND");
+
+  // Проверяем, что удаляет именно автор поста (в будущем добавим права админа/модератора)
+  if (post.authorId !== session.user.id) {
+    throw new Error("ACCESS_DENIED");
+  }
+
+  // Безопасно удаляем все комментарии к посту, а затем сам пост
+  await prisma.$transaction([
+    prisma.comment.deleteMany({ where: { postId } }),
+    prisma.post.delete({ where: { id: postId } }),
+  ]);
+
+  // Обновляем главную страницу и перекидываем туда пользователя
   revalidatePath("/");
   redirect("/");
 }

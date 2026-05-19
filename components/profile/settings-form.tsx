@@ -4,6 +4,8 @@
 import { useState, useTransition } from "react";
 import { updateProfile } from "@/lib/actions/user";
 import { useRouter } from "next/navigation";
+import { UploadButton } from "@uploadthing/react";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
 // Описываем, какие данные компонент ждет на вход
 interface SettingsFormProps {
@@ -46,6 +48,30 @@ export default function SettingsForm({ initialUsername, initialBio }: SettingsFo
           {error}
         </div>
       )}
+
+{/* Блок загрузки аватарки */}
+      <div>
+        <label className="block text-sm font-medium text-gray-400 mb-2">
+          Аватар профиля
+        </label>
+        <div className="bg-[#1A1A22] border border-gray-800 rounded-lg p-6 flex flex-col items-center justify-center border-dashed">
+          <UploadButton<OurFileRouter, "imageUploader">
+            endpoint="imageUploader"
+            onClientUploadComplete={(res) => {
+              alert("Аватарка успешно загружена! Обновите страницу.");
+              router.refresh(); // Обновляет данные на странице
+            }}
+            onUploadError={(error: Error) => {
+              alert(`Ошибка загрузки: ${error.message}`);
+            }}
+            appearance={{
+              button: "bg-[#A855F7] hover:bg-[#9333EA] text-white px-4 py-2 rounded-lg text-sm font-medium transition",
+              allowedContent: "text-gray-500 text-xs mt-2"
+            }}
+
+          />
+        </div>
+      </div>
 
       {/* Поле Никнейм */}
       <div>

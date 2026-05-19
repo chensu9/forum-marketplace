@@ -1,3 +1,4 @@
+// app/post/[id]/page.tsx
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -5,145 +6,184 @@ import { createComment } from "@/lib/actions/comment";
 import { auth } from "@/auth";
 import LikeButton from "@/components/post/like-button";
 import ViewTracker from "@/components/post/view-tracker";
+import DeleteButton from "@/components/post/delete-button";
+import ReportButton from "@/components/post/report-button";
+import ReplyForm from "@/components/post/reply-form";
 
-// 1. ИЗМЕНЕНИЕ ЗДЕСЬ: params теперь Promise
+// === РЕКУРСИВНЫЙ КОМПОНЕНТ ДЛЯ ОТРИСОВКИ ВЕТОК (СЕТКИ) ===
+function CommentNode({ comment, allComments, postId, postAuthorId, depth = 0, session }: any) {
+  // Ищем все дочерние комментарии (ответы на текущий)
+  const children = allComments.filter((c: any) => c.parentId === comment.id);
+
+  return (
+    <div className={`relative ${depth > 0 ? 'ml-4 sm:ml-8 border-l border-[#4AF626]/20 pl-4 mt-3' : 'border-l-2 border-[#4AF626]/50 pl-3 py-1 hover:border-[#4AF626] transition mt-4'}`}>
+      
+      {/* Шапка коммента */}
+      <div className="flex items-center gap-2 mb-1 text-[10px]">
+        <Link href={`/profile/${comment.author.username}`} className="font-bold text-white hover:text-glow transition">
+          usr: {comment.author.username}
+        </Link>
+        {comment.author.id === postAuthorId && (
+          <span className="bg-[#4AF626]/20 text-[#4AF626] px-1 text-[8px] uppercase font-bold border border-[#4AF626]/30">OP</span>
+        )}
+        <span className="text-[#4AF626]/40">[{comment.createdAt.toLocaleString("ru-RU")}]</span>
+      </div>
+      
+      {/* Текст */}
+      <p className="text-[#4AF626]/80 text-xs whitespace-pre-wrap leading-relaxed break-all">
+        {comment.content}
+      </p>
+
+      {/* Кнопка ответить (Только для авторизованных) */}
+      {session?.user && (
+        <ReplyForm postId={postId} parentId={comment.id} />
+      )}
+
+      {/* РЕКУРСИЯ: Если есть ответы, рисуем их внутри этого же блока */}
+      {children.length > 0 && (
+        <div className="mt-2">
+          {children.map((child: any) => (
+            <CommentNode 
+              key={child.id} 
+              comment={child} 
+              allComments={allComments} 
+              postId={postId} 
+              postAuthorId={postAuthorId} 
+              depth={depth + 1}
+              session={session}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 export default async function SinglePostPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  
-  // 2. ИЗМЕНЕНИЕ ЗДЕСЬ: мы "распаковываем" params через await
   const resolvedParams = await params;
   
-  // Ищем пост в базе данных
   const post = await prisma.post.findUnique({
-    // 3. Используем уже распакованный ID
     where: { id: resolvedParams.id },
     include: {
-      author: true,
-      tags: true,
-      likedBy: { select: { id: true } },
-      comments: {
-        include: { author: true },
-        orderBy: { createdAt: "asc" },
-      },
+      author: true, tags: true, likedBy: { select: { id: true } },
+      comments: { include: { author: true }, orderBy: { createdAt: "asc" } },
     },
   });
 
-  // Если пост удален или ID неверный - показываем 404
-  if (!post) {
-    notFound();
-  }
-
+  if (!post) notFound();
   const hasLiked = post.likedBy.some((user) => user.id === session?.user?.id);
 
+  // Выбираем только корневые комментарии (у которых нет родителя)
+  const topLevelComments = post.comments.filter(c => !c.parentId);
+
   return (
-    <div className="min-h-screen bg-[#0F0F14] text-white py-10 px-4">
-        <ViewTracker postId={post.id} />
+    <div className="max-w-3xl mx-auto space-y-4 font-mono">
+      <ViewTracker postId={post.id} />
 
-    <div className="max-w-4xl mx-auto space-y-6"></div>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <Link href="/" className="inline-block text-[#4AF626]/60 hover:text-white hover:text-glow transition mb-2 font-bold text-[11px]">
+        &lt; RETURN_TO_MAIN
+      </Link>
+
+      {/* ТЕЛО ПОСТА */}
+      <article className="border border-[#4AF626]/50 bg-[#0A0A0A]/80 p-4 shadow-[0_0_15px_rgba(74,246,38,0.05)] relative">
+        <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#4AF626]"></div>
         
-        {/* Кнопка назад */}
-        <Link href="/" className="inline-block text-gray-400 hover:text-white transition mb-4">
-          ← Назад в ленту
-        </Link>
-
-        {/* САМ ПОСТ */}
-        <article className="nb-card p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center text-[#A855F7] font-bold">
-              {post.author.username[0].toUpperCase()}
-            </div>
-            <div>
-              <div className="font-semibold">{post.author.username}</div>
-              <div className="text-xs text-gray-400">
-                {post.createdAt.toLocaleDateString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
-              </div>
+        <div className="flex justify-between items-start mb-3 border-b border-[#4AF626]/30 pb-2">
+          <div>
+            <div className="text-[9px] text-[#4AF626]/60 uppercase tracking-widest mb-0.5">AUTHOR_ID</div>
+            <div className="flex items-center">
+              <Link href={`/profile/${post.author.username}`} className="text-sm font-bold text-white text-glow hover:text-[#4AF626] transition">
+                {post.author.username}
+              </Link>
+              {session?.user?.id === post.authorId ? (
+                <DeleteButton postId={post.id} />
+              ) : (
+                session?.user && <ReportButton postId={post.id} isOwnPost={false} />
+              )}
             </div>
           </div>
-
-          <h1 className="text-2xl md:text-3xl font-bold mb-4">{post.title}</h1>
-          <div className="flex items-center gap-4 mb-6">
-  {session?.user ? (
-    <LikeButton 
-      postId={post.id} 
-      initialLikes={post.likedBy.length} 
-      initialHasLiked={hasLiked} 
-    />
-  ) : (
-    <div className="flex items-center gap-2 text-xs font-medium text-gray-400">
-      <span className="text-base">🤍</span>
-      <span>{post.likedBy.length}</span>
-    </div>
-  )}
-  <div className="flex items-center gap-2 text-xs font-medium text-gray-400">
-    <span className="text-base">👁️</span>
-    <span>{post.views}</span>
-  </div>
-</div>
-          <p className="text-gray-300 leading-relaxed whitespace-pre-wrap mb-6">
-            {post.content}
-          </p>
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {post.tags.map(tag => (
-              <span key={tag.id} className="bg-purple-500/10 text-[#A855F7] px-3 py-1 rounded-full text-sm">
-                #{tag.name}
-              </span>
-            ))}
-          </div>
-        </article>
-
-        {/* СЕКЦИЯ КОММЕНТАРИЕВ */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold mb-4">Комментарии ({post.comments.length})</h2>
-
-          {/* Форма для нового комментария */}
-          {session?.user ? (
-            <form action={createComment} className="nb-card p-4 flex flex-col gap-3">
-              {/* Скрытое поле для передачи ID поста в серверный экшен */}
-              <input type="hidden" name="postId" value={post.id} />
-              
-              <textarea
-                name="content"
-                required
-                rows={3}
-                placeholder="Написать комментарий..."
-                className="w-full bg-[#1A1A22] border border-gray-800 rounded-lg p-3 text-white focus:border-[#A855F7] outline-none transition resize-y"
-              />
-              <div className="flex justify-end">
-                <button type="submit" className="nb-button-primary px-6 py-2 text-sm">
-                  Отправить
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="nb-card p-4 text-center text-gray-400 text-sm">
-              <Link href="/login" className="text-[#A855F7] hover:underline">Войдите</Link>, чтобы оставить комментарий.
-            </div>
-          )}
-
-          {/* Список комментариев */}
-          <div className="space-y-4 mt-6">
-            {post.comments.length === 0 ? (
-              <p className="text-gray-500 text-center py-4 text-sm">Пока нет комментариев. Будьте первым!</p>
-            ) : (
-              post.comments.map((comment) => (
-                <div key={comment.id} className="nb-card p-4 bg-[#1E1E28]/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Link href={`/profile/${comment.author.username}`} className="font-medium text-white hover:text-[#A855F7]">
-  {post.author.username}
-</Link>
-                    <span className="text-xs text-gray-500">
-                      {comment.createdAt.toLocaleDateString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                  <p className="text-gray-300 text-sm whitespace-pre-wrap">{comment.content}</p>
-                </div>
-              ))
-            )}
+          <div className="text-right shrink-0">
+            <div className="text-[9px] text-[#4AF626]/60 uppercase tracking-widest mb-0.5">TIMESTAMP</div>
+            <div className="text-[10px] text-[#4AF626] font-bold">{post.createdAt.toLocaleString("ru-RU")}</div>
           </div>
         </div>
 
+        <h1 className="text-lg font-bold text-[#4AF626] mb-3 tracking-wide break-all">
+          {post.title}
+        </h1>
+        
+        <p className="text-[#4AF626]/80 whitespace-pre-wrap break-all leading-relaxed text-sm mb-4">
+          {post.content}
+        </p>
+
+        {post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {post.tags.map(tag => (
+              <Link href={`/?tag=${tag.name}`} key={tag.id} className="text-[10px] border border-[#4AF626]/30 px-1.5 py-0.5 text-[#4AF626] hover:bg-[#4AF626] hover:text-[#0A0A0A] transition font-bold">
+                #{tag.name}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center gap-4 border-t border-[#4AF626]/30 pt-2 text-xs font-bold text-[#4AF626]/60">
+          {session?.user ? (
+             <LikeButton postId={post.id} initialLikes={post.likedBy.length} initialHasLiked={hasLiked} />
+          ) : (
+            <span>L:{post.likedBy.length}</span>
+          )}
+          <span>V:{post.views}</span>
+        </div>
+      </article>
+
+      {/* СЕКЦИЯ КОММЕНТАРИЕВ */}
+      <div className="border border-[#4AF626]/30 bg-[#0A0A0A]/60 p-4">
+        <h2 className="text-sm font-bold text-white text-glow mb-4 flex items-center gap-2">
+          ~/comments_log <span className="text-[#4AF626]/50 text-xs">[{post.comments.length}]</span>
+        </h2>
+
+        {/* Форма для ГЛАВНОГО (корневого) комментария */}
+        {session?.user ? (
+          <form action={createComment} className="mb-8 border border-[#4AF626]/50 bg-[#0A0A0A] focus-within:border-[#4AF626] transition-all relative">
+            <div className="absolute top-3 left-3 text-[#4AF626]/50 font-bold text-xs">&gt;</div>
+            <input type="hidden" name="postId" value={post.id} />
+            <textarea
+              name="content" required rows={2} placeholder="INPUT_TEXT_HERE..."
+              className="w-full bg-transparent p-3 pl-7 text-xs text-[#4AF626] placeholder-[#4AF626]/30 outline-none resize-y"
+            />
+            <div className="flex justify-end border-t border-[#4AF626]/30 p-1.5 bg-[#4AF626]/5">
+              <button type="submit" className="border border-[#4AF626] text-[#4AF626] hover:bg-[#4AF626] hover:text-[#0A0A0A] px-4 py-1 text-[10px] font-bold transition uppercase">
+                [ EXECUTE ]
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="mb-6 p-3 border border-[#4AF626]/30 border-dashed text-center text-[#4AF626]/50 text-[10px] font-bold tracking-widest">
+            AUTH_REQUIRED. <Link href="/login" className="text-white text-glow hover:underline">RUN login.exe</Link>
+          </div>
+        )}
+
+        {/* ВЫВОД ДРЕВОВИДНЫХ КОММЕНТАРИЕВ */}
+        <div className="space-y-1">
+          {topLevelComments.length === 0 ? (
+            <div className="text-center text-[#4AF626]/40 py-4 border border-[#4AF626]/10 border-dashed text-[10px] tracking-widest">
+              _NO_LOGS_FOUND_
+            </div>
+          ) : (
+            topLevelComments.map((comment) => (
+              <CommentNode 
+                key={comment.id} 
+                comment={comment} 
+                allComments={post.comments} 
+                postId={post.id} 
+                postAuthorId={post.author.id} 
+                session={session} 
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

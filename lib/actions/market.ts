@@ -33,7 +33,7 @@ export async function createListing(formData: FormData) {
       price,
       sellerId: session.user.id,
       // Временно оставляем массив картинок пустым, загрузку фото прикрутим позже
-      images: [], 
+      imageUrl: formData.get("imageUrl") 
     },
   });
 

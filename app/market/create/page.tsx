@@ -47,7 +47,24 @@ export default async function CreateListingPage() {
               placeholder="Подробно опишите, что вы продаете..."
             />
           </div>
-
+{/* Поле для Картинки Товара */}
+          <div>
+            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">
+              ITEM_IMAGE_URL (Optional)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-3 text-[#4AF626]/50 font-bold">&gt;</span>
+              <input 
+                type="url" 
+                name="imageUrl" 
+                placeholder="https://example.com/image.png"
+                className="w-full bg-[#4AF626]/5 border border-[#4AF626]/30 p-3 pl-8 text-sm text-[#4AF626] focus:border-[#4AF626] focus:shadow-[0_0_10px_rgba(74,246,38,0.1)] outline-none transition-all placeholder:text-[#4AF626]/30" 
+              />
+            </div>
+            <p className="text-[9px] text-[#4AF626]/40 mt-2 uppercase tracking-widest">
+              * Paste direct image link.
+            </p>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               Цена (₽)

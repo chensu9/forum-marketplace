@@ -1,31 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import "@uploadthing/react/styles.css";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { auth } from "@/auth";
+import GlobalHeader from "@/components/global-header";
 
 export const metadata: Metadata = {
-  title: "NexusBoard",
-  description: "Project management dashboard",
+  title: "hatehatehateforum | CLI",
+  description: "Terminal based forum",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
-        {children}
+    <html lang="ru">
+      <body className="bg-[#0A0A0A] text-[#4AF626] font-mono selection:bg-[#4AF626] selection:text-[#0A0A0A] antialiased min-h-screen flex flex-col crt-overlay">
+        
+        <GlobalHeader session={session} />
+
+        {/* ДОБАВЛЕНО max-w-[1600px] mx-auto, чтобы контент не растягивался на ульра-широких мониторах */}
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 py-6 relative z-10">
+          {children}
+        </main>
+
       </body>
     </html>
   );

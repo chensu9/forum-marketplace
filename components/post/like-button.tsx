@@ -1,49 +1,31 @@
-// components/post/like-button.tsx
 "use client";
 
-import { useState, useTransition } from "react";
-import { toggleLike } from "@/lib/actions/like";
+import { useState } from "react";
+import { toggleLike } from "@/lib/actions/like"; 
 
-interface LikeButtonProps {
-  postId: string;
-  initialLikes: number;
-  initialHasLiked: boolean;
-}
-
-export default function LikeButton({ postId, initialLikes, initialHasLiked }: LikeButtonProps) {
-  const [isPending, startTransition] = useTransition();
+export default function LikeButton({ postId, initialLikes, initialHasLiked }: { postId: string, initialLikes: number, initialHasLiked: boolean }) {
   const [likes, setLikes] = useState(initialLikes);
   const [hasLiked, setHasLiked] = useState(initialHasLiked);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // ДОБАВИЛИ e: React.MouseEvent
-  const handleToggle = (e: React.MouseEvent) => {
-    e.preventDefault();  // Запрещает переходить по ссылке <Link>
-    e.stopPropagation(); // Останавливает всплытие клика к родителям
-
+  const handleLike = async () => {
+    setIsLoading(true);
     setHasLiked(!hasLiked);
     setLikes(hasLiked ? likes - 1 : likes + 1);
-
-    startTransition(async () => {
-      try {
-        await toggleLike(postId);
-      } catch (error) {
-        setHasLiked(hasLiked);
-        setLikes(initialLikes);
-      }
-    });
+    setIsLoading(false);
+    
+    
+    await toggleLike(postId);
+    
   };
 
   return (
-    <button
-      onClick={handleToggle}
-      disabled={isPending}
-      className={`flex items-center gap-1 text-xs font-medium transition ${
-        hasLiked ? "text-[#A855F7]" : "text-gray-400 hover:text-white"
-      }`}
+    <button 
+      onClick={handleLike} 
+      disabled={isLoading}
+      className={`hover:text-white transition font-bold ${hasLiked ? 'text-white text-glow' : 'text-[#4AF626]/60'}`}
     >
-      {/* Теперь тут правильное сердечко вместо пальца вверх */}
-      <span className="text-base">{hasLiked ? "💜" : "🤍"}</span>
-      <span>{likes}</span>
+      {hasLiked ? `[ L:${likes} ]` : `L:${likes}`}
     </button>
   );
 }

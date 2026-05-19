@@ -41,10 +41,12 @@ model User {
   password      String?
   image         String?
   bio           String?   // Описание профиля
+  profileBackground String?
   reputation    Int       @default(0) // Репутация (лайки + посты)
   role          Role      @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  reports Report[]
 
   // --- СВЯЗИ (Relations) ---
   // Форум
@@ -70,6 +72,7 @@ model Post {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  reports Report[]
 
   // Автор поста
   authorId  String
@@ -135,6 +138,7 @@ model Order {
   status    OrderStatus @default(PENDING)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  imageUrl  String?
 
   // Товар/Услуга
   listingId String
@@ -147,4 +151,19 @@ model Order {
   // Продавец
   sellerId  String
   seller    User        @relation("SellerOrders", fields: [sellerId], references: [id])
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  reason    String   // Причина жалобы
+  createdAt DateTime @default(now())
+  status    String   @default("PENDING") // Статусы: PENDING, RESOLVED, DISMISSED
+
+  // Связь с постом
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+
+  // Связь с пользователем (кто пожаловался)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
 }
