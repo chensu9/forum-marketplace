@@ -3,6 +3,8 @@ import "@uploadthing/react/styles.css";
 import "./globals.css";
 import { auth } from "@/auth";
 import GlobalHeader from "@/components/global-header";
+import BanGuard from "@/components/auth/ban-guard";
+import UnreadCounter from "@/components/messages/unread-counter";
 
 export const metadata: Metadata = {
   title: "hatehatehateforum | CLI",
@@ -14,6 +16,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="ru">
+      <BanGuard>
       <body className="bg-[#0A0A0A] text-[#4AF626] font-mono selection:bg-[#4AF626] selection:text-[#0A0A0A] antialiased min-h-screen flex flex-col crt-overlay">
         
         <GlobalHeader session={session} />
@@ -24,6 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
 
       </body>
+      </BanGuard>
     </html>
   );
 }

@@ -9,6 +9,7 @@ import ViewTracker from "@/components/post/view-tracker";
 import DeleteButton from "@/components/post/delete-button";
 import ReportButton from "@/components/post/report-button";
 import ReplyForm from "@/components/post/reply-form";
+import RoleBadge from "@/components/user/role-badge";
 
 // === РЕКУРСИВНЫЙ КОМПОНЕНТ ДЛЯ ОТРИСОВКИ ВЕТОК (СЕТКИ) ===
 function CommentNode({ comment, allComments, postId, postAuthorId, depth = 0, session }: any) {
@@ -23,6 +24,7 @@ function CommentNode({ comment, allComments, postId, postAuthorId, depth = 0, se
         <Link href={`/profile/${comment.author.username}`} className="font-bold text-white hover:text-glow transition">
           usr: {comment.author.username}
         </Link>
+        <RoleBadge role={comment.author.role} />
         {comment.author.id === postAuthorId && (
           <span className="bg-[#4AF626]/20 text-[#4AF626] px-1 text-[8px] uppercase font-bold border border-[#4AF626]/30">OP</span>
         )}
@@ -97,6 +99,7 @@ export default async function SinglePostPage({ params }: { params: Promise<{ id:
               <Link href={`/profile/${post.author.username}`} className="text-sm font-bold text-white text-glow hover:text-[#4AF626] transition">
                 {post.author.username}
               </Link>
+              <RoleBadge role={post.author.role} />
               {session?.user?.id === post.authorId ? (
                 <DeleteButton postId={post.id} />
               ) : (

@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import LikeButton from "@/components/post/like-button";
+import RoleBadge from "@/components/user/role-badge";
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ tag?: string, q?: string }> }) {
   const session = await auth();
@@ -119,7 +120,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     {post.title}
                   </h3>
                   <div className="flex justify-between items-center text-[9px]">
-                    <span className="text-[#4AF626]/50">usr:{post.author.username}</span>
+                    <div className="flex items-center text-[#4AF626]/50">
+                    <span>usr:{post.author.username}</span>
+                    <RoleBadge role={post.author.role} />
+                  </div>
                     {post.isHot ? (
                       <span className="text-[#4AF626] font-bold animate-pulse text-glow uppercase">HOT &lt;1h</span>
                     ) : (
@@ -163,7 +167,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               posts.map((post) => (
                 <div key={post.id} className="p-4 border border-[#4AF626]/30 hover:border-[#4AF626] hover:shadow-[0_0_15px_rgba(74,246,38,0.1)] bg-[#0A0A0A]/60 transition-all group relative">
                   <div className="flex justify-between items-start mb-3 text-[10px] text-[#4AF626]/60 font-bold uppercase tracking-widest">
-                    <Link href={`/profile/${post.author.username}`} className="hover:text-white transition">usr: {post.author.username}</Link>
+                    <div className="flex items-center">
+                      <Link href={`/profile/${post.author.username}`} className="hover:text-white transition">usr: {post.author.username}</Link>
+                      <RoleBadge role={post.author.role} />
+                    </div>
                     <div className="flex gap-2">
                         <span>{post.createdAt.toLocaleDateString("ru-RU")}</span>
                         {post.tags.map(tag => (
@@ -206,6 +213,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   <Link href={`/profile/${u.username}`} className="flex items-center gap-2 hover:text-white hover:text-glow transition truncate">
                     <span className="text-[#4AF626]/40 text-[9px]">0{index + 1}</span>
                     <span className="truncate max-w-[100px]">{u.username}</span>
+                    <RoleBadge role={u.role} />
                   </Link>
                   <span className="text-[#4AF626]/60 bg-[#4AF626]/10 px-1 border border-[#4AF626]/20">{u._count.posts}</span>
                 </div>

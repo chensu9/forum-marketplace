@@ -34,19 +34,20 @@ enum OrderStatus {
 // ==========================================
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  username      String    @unique
-  email         String    @unique
-  password      String?
-  image         String?
-  bio           String?   // Описание профиля
+  id                String    @id @default(cuid())
+  name              String?
+  username          String    @unique
+  email             String    @unique
+  password          String?
+  image             String?
+  bio               String?   // Описание профиля
   profileBackground String?
-  reputation    Int       @default(0) // Репутация (лайки + посты)
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  reports Report[]
+  reputation        Int       @default(0) // Репутация (лайки + посты)
+  role              Role      @default(USER)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  reports           Report[]
+  isBanned          Boolean   @default(false) // НОВОЕ ПОЛЕ: По умолчанию никто не забанен
 
   // --- СВЯЗИ (Relations) ---
   // Форум
@@ -58,6 +59,10 @@ model User {
   listings      Listing[] @relation("UserListings")
   ordersBought  Order[]   @relation("BuyerOrders")
   ordersSold    Order[]   @relation("SellerOrders")
+
+  // Личные сообщения
+  messagesSent     Message[] @relation("SentMessages")
+  messagesReceived Message[] @relation("ReceivedMessages")
 }
 
 // ==========================================
@@ -72,7 +77,7 @@ model Post {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  reports Report[]
+  reports   Report[]
 
   // Автор поста
   authorId  String
@@ -120,6 +125,7 @@ model Listing {
   description String   @db.Text
   price       Float    // Цена услуги/товара
   images      String[] // Ссылки на картинки
+  imageUrl    String?  // <--- ИСПРАВЛЕННОЕ ПОЛЕ (Картинка товара)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -138,7 +144,6 @@ model Order {
   status    OrderStatus @default(PENDING)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  imageUrl  String?
 
   // Товар/Услуга
   listingId String
@@ -153,6 +158,10 @@ model Order {
   seller    User        @relation("SellerOrders", fields: [sellerId], references: [id])
 }
 
+// ==========================================
+// 6. СИСТЕМА ЖАЛОБ (Репорты)
+// ==========================================
+
 model Report {
   id        String   @id @default(cuid())
   reason    String   // Причина жалобы
@@ -166,4 +175,23 @@ model Report {
   // Связь с пользователем (кто пожаловался)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
+}
+
+// ==========================================
+// 7. ЛИЧНЫЕ СООБЩЕНИЯ (Secure Comms)
+// ==========================================
+
+model Message {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  isRead      Boolean  @default(false) // Прочитано или нет (для уведомлений)
+  createdAt   DateTime @default(now())
+
+  // Кто отправил
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  // Кому отправили
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 }

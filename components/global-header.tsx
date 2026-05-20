@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import UnreadCounter from "@/components/messages/unread-counter";
 
 export default function GlobalHeader({ session }: { session: any }) {
   const pathname = usePathname();
@@ -35,6 +36,7 @@ export default function GlobalHeader({ session }: { session: any }) {
             <Link href="/" className="hover:text-white hover:text-glow transition">[ Темы ]</Link>
             <Link href="/users" className="hover:text-white hover:text-glow transition">[ Пользователи ]</Link>
             <Link href="/market" className="hover:text-white hover:text-glow transition">[ Маркет ]</Link>
+            <UnreadCounter />
           </nav>
 
           {/* Панель юзера и кнопка создания */}

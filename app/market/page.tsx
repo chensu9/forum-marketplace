@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { auth } from "@/auth";
+import RoleBadge from "@/components/user/role-badge";
 
 export default async function MarketPage() {
   const session = await auth();
@@ -80,6 +81,7 @@ export default async function MarketPage() {
                 <Link href={`/profile/${listing.seller.username}`} className="text-[#4AF626]/70 hover:text-white transition uppercase truncate max-w-[100px]">
                   usr: {listing.seller.username}
                 </Link>
+                <RoleBadge role={listing.seller.role} />
                 <Link href={`/market/${listing.id}`} className="text-[#4AF626] hover:text-white transition font-bold tracking-widest shrink-0">
                   [ INFO ]
                 </Link>

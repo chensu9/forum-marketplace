@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/auth";
 import BgUploadButton from "@/components/profile/bg-upload-button";
+import RoleBadge from "@/components/user/role-badge";
 
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const session = await auth();
@@ -102,18 +103,26 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 
                 <h1 className="text-3xl sm:text-4xl font-bold text-white text-glow uppercase tracking-wider leading-none mt-1 truncate">
                   {user.username}
+                  <RoleBadge role={user.role} />
                 </h1>
 
                 {/* КНОПКИ (Прижаты вправо) */}
-                {isOwnProfile && (
-                  <div className="flex gap-3 shrink-0 h-fit">
-                    <Link href="/settings" className="flex items-center justify-center border border-[#4AF626] text-[#4AF626] px-4 py-2 hover:bg-[#4AF626] hover:text-[#0A0A0A] text-[11px] sm:text-sm font-bold transition uppercase shadow-[0_0_10px_rgba(74,246,38,0.1)]">
-                      [ CONFIG ]
-                    </Link>
-                    {/* НАША НОВАЯ РАБОЧАЯ КНОПКА ЗАГРУЗКИ */}
-                    <BgUploadButton />
-                  </div>
-                )}
+                <div className="flex gap-3 shrink-0 h-fit">
+                  {isOwnProfile ? (
+                    <>
+                      <Link href="/settings" className="flex items-center justify-center border border-[#4AF626] text-[#4AF626] px-4 py-2 hover:bg-[#4AF626] hover:text-[#0A0A0A] text-[11px] sm:text-sm font-bold transition uppercase shadow-[0_0_10px_rgba(74,246,38,0.1)]">
+                        [ CONFIG ]
+                      </Link>
+                      <BgUploadButton />
+                    </>
+                  ) : (
+                    session?.user && (
+                      <Link href={`/messages/${user.username}`} className="flex items-center justify-center border border-yellow-500 text-yellow-500 px-4 py-2 hover:bg-yellow-500 hover:text-[#0A0A0A] text-[11px] sm:text-sm font-bold transition uppercase shadow-[0_0_10px_rgba(234,179,8,0.1)]">
+                        [ ENCRYPTED_MSG ]
+                      </Link>
+                    )
+                  )}
+                </div>
                 
               </div>
 

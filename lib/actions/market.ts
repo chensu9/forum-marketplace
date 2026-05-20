@@ -6,38 +6,101 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+// ==========================================
+// СОЗДАНИЕ ОБЪЯВЛЕНИЯ
+// ==========================================
 export async function createListing(formData: FormData) {
-  // 1. Проверяем авторизацию
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Необходимо войти в аккаунт");
   }
 
-  // 2. Достаем данные из формы
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const priceString = formData.get("price") as string;
-
-  // Преобразуем цену в число
   const price = parseFloat(priceString);
 
   if (!title || !description || isNaN(price) || price < 0) {
     throw new Error("Пожалуйста, заполните все поля корректно");
   }
 
-  // 3. Создаем объявление в БД
   await prisma.listing.create({
     data: {
       title,
       description,
       price,
       sellerId: session.user.id,
-      // Временно оставляем массив картинок пустым, загрузку фото прикрутим позже
-      imageUrl: formData.get("imageUrl") 
+      imageUrl: formData.get("imageUrl") as string | null,
     },
   });
 
-  // 4. Обновляем кэш маркета и перекидываем туда пользователя
   revalidatePath("/market");
   redirect("/market");
+}
+
+// ==========================================
+// ГАРАНТ-СДЕЛКИ (ESCROW)
+// ==========================================
+
+// 1. Начать сделку (Заморозка средств)
+export async function createEscrowOrder(listingId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("UNAUTHORIZED");
+
+  const listing = await prisma.listing.findUnique({ where: { id: listingId } });
+  if (!listing) throw new Error("SYS_ERR: ITEM_NOT_FOUND");
+  
+  if (listing.sellerId === session.user.id) {
+    throw new Error("SYS_ERR: CANNOT_BUY_OWN_ITEM");
+  }
+
+  await prisma.order.create({
+    data: {
+      listingId: listing.id,
+      buyerId: session.user.id,
+      sellerId: listing.sellerId,
+      price: listing.price,
+      status: "IN_PROGRESS", 
+    }
+  });
+
+  redirect("/market/orders");
+}
+
+// 2. Подтвердить получение (Деньги уходят продавцу)
+export async function confirmDelivery(orderId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("UNAUTHORIZED");
+
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order || order.buyerId !== session.user.id) throw new Error("ACCESS_DENIED");
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "COMPLETED" }
+  });
+
+  revalidatePath("/market/orders");
+  revalidatePath("/market/sales");
+}
+
+// 3. Отмена сделки (Возврат)
+export async function cancelEscrow(orderId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("UNAUTHORIZED");
+
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) throw new Error("NOT_FOUND");
+  
+  if (order.buyerId !== session.user.id && order.sellerId !== session.user.id) {
+    throw new Error("ACCESS_DENIED");
+  }
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "CANCELLED" }
+  });
+
+  revalidatePath("/market/orders");
+  revalidatePath("/market/sales");
 }
