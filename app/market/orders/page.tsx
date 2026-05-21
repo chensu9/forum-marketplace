@@ -19,10 +19,10 @@ export default async function OrdersPage() {
       
       <div className="flex justify-between items-end mb-2">
         <Link href="/market" className="text-[#4AF626]/60 hover:text-white hover:text-glow transition font-bold text-[11px]">
-          &lt; RETURN_TO_MARKET
+          &lt; ВЕРНУТСЯ В МАРКЕТ
         </Link>
         <div className="text-[10px] text-[#4AF626]/50 tracking-widest uppercase">
-          ESCURE_ESCROW_CONNECTION: ESTABLISHED
+          ПОДКЛЮЧЕНО
         </div>
       </div>
 
@@ -30,7 +30,7 @@ export default async function OrdersPage() {
         <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-[#4AF626]/30"></div>
 
         <h1 className="text-xl font-bold text-white text-glow uppercase tracking-widest mb-2 flex items-center gap-2">
-          ~// financial_logs : purchases
+          ~// financial_logs : ПОКУПКИ
         </h1>
         <p className="text-[#4AF626]/60 text-xs mb-8 uppercase tracking-widest">
           NODE: {session.user.username} | TOTAL_RECORDS: {orders.length}
@@ -38,19 +38,19 @@ export default async function OrdersPage() {
 
         {orders.length === 0 ? (
           <div className="border border-dashed border-[#4AF626]/30 p-8 text-center text-[#4AF626]/40 text-sm tracking-widest">
-            _NO_PURCHASE_HISTORY_FOUND_
+            У ВАС ЕЩЁ НЕТ ПОКУПОК
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-[#4AF626]">
               <thead className="text-[10px] uppercase text-[#4AF626]/60 border-b border-[#4AF626]/30">
                 <tr>
-                  <th className="pb-3 font-bold tracking-widest">TX_ID</th>
-                  <th className="pb-3 font-bold tracking-widest">Item_Name</th>
-                  <th className="pb-3 font-bold tracking-widest">Seller</th>
-                  <th className="pb-3 font-bold tracking-widest">Value</th>
-                  <th className="pb-3 font-bold tracking-widest">Status</th>
-                  <th className="pb-3 font-bold tracking-widest text-right">Actions</th>
+                  <th className="pb-3 font-bold tracking-widest">ID</th>
+                  <th className="pb-3 font-bold tracking-widest">Название</th>
+                  <th className="pb-3 font-bold tracking-widest">Продавец</th>
+                  <th className="pb-3 font-bold tracking-widest">Сумма</th>
+                  <th className="pb-3 font-bold tracking-widest">Статус</th>
+                  <th className="pb-3 font-bold tracking-widest text-right">Действия</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#4AF626]/10">
@@ -82,12 +82,12 @@ export default async function OrdersPage() {
                         <div className="flex justify-end gap-2 flex-wrap">
                           <form action={async () => { "use server"; await confirmDelivery(order.id); }}>
                             <button className="text-[9px] border border-[#4AF626] text-[#4AF626] px-2 py-1 hover:bg-[#4AF626] hover:text-[#0A0A0A] font-bold uppercase transition tracking-widest">
-                              [ CONFIRM_RCV ]
+                              [ ПОДТВЕРДИТЬ_СДЕЛКУ ]
                             </button>
                           </form>
                           <form action={async () => { "use server"; await cancelEscrow(order.id); }}>
                             <button className="text-[9px] border border-red-500/50 text-red-500 px-2 py-1 hover:bg-red-500 hover:text-[#0A0A0A] font-bold uppercase transition tracking-widest">
-                              [ ABORT ]
+                              [ ОТМЕНИТЬ ]
                             </button>
                           </form>
                         </div>

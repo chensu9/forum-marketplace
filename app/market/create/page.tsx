@@ -50,7 +50,7 @@ export default async function CreateListingPage() {
 {/* Поле для Картинки Товара */}
           <div>
             <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">
-              ITEM_IMAGE_URL (Optional)
+              Ссылка на изображение (опционально)
             </label>
             <div className="relative">
               <span className="absolute left-3 top-3 text-[#4AF626]/50 font-bold">&gt;</span>
@@ -62,7 +62,7 @@ export default async function CreateListingPage() {
               />
             </div>
             <p className="text-[9px] text-[#4AF626]/40 mt-2 uppercase tracking-widest">
-              * Paste direct image link.
+              * Рекомендуемый размер: 600x400px. Поддерживаются форматы JPG, PNG, GIF.
             </p>
           </div>
           <div>

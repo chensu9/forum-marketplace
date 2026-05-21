@@ -53,8 +53,8 @@ export default async function AdminReportsPage() {
               <div key={report.id} className="border border-yellow-500/30 bg-yellow-500/5 p-4 flex flex-col md:flex-row gap-4 justify-between items-start">
                 
                 {/* Инфо о жалобе */}
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-yellow-500/60">
+                <div className="flex-1 space-y-2 min-w-0 break-words">
+                  <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-yellow-500/60 min-w-0 break-words">
                     <span>FLAG_ID: {report.id.slice(0, 8)}</span>
                     <span>|</span>
                     <span>Reported_By: {report.user.username}</span>
@@ -67,9 +67,9 @@ export default async function AdminReportsPage() {
                   </div>
 
                   {report.post ? (
-                    <div className="mt-4 border-l-2 border-yellow-500/30 pl-3">
+                    <div className="mt-4 border-l-2 border-yellow-500/30 pl-3 min-w-0 break-words">
                       <div className="text-[10px] uppercase text-[#4AF626]/60 mb-1">Target_Record:</div>
-                      <Link href={`/post/${report.post.id}`} target="_blank" className="text-lg font-bold text-[#4AF626] hover:text-white transition">
+                      <Link href={`/post/${report.post.id}`} target="_blank" className="text-lg font-bold text-[#4AF626] hover:text-white transition min-w-0 break-words">
                         {report.post.title}
                       </Link>
                       <p className="text-xs text-[#4AF626]/70 line-clamp-2 mt-1">{report.post.content}</p>

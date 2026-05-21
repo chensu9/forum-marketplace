@@ -15,7 +15,7 @@ export default async function CreatePostPage() {
     <div className="max-w-3xl mx-auto font-mono space-y-6">
       
       <Link href="/" className="inline-block text-[#4AF626]/60 hover:text-white hover:text-glow transition mb-2 font-bold text-[11px]">
-        &lt; ABORT_OPERATION
+        &lt; Отменить и вернуться в меню
       </Link>
 
       <div className="border border-[#4AF626]/50 bg-[#0A0A0A]/80 p-6 sm:p-8 shadow-[0_0_15px_rgba(74,246,38,0.05)] relative overflow-hidden">
@@ -28,7 +28,7 @@ export default async function CreatePostPage() {
           ~// thread_injector.exe
         </h1>
         <p className="text-[#4AF626]/60 text-xs mb-8 uppercase tracking-widest">
-          STATUS: <span className="text-[#4AF626] font-bold animate-pulse text-glow">READY</span> | NODE_USR: {session.user.username}
+          Статус: <span className="text-[#4AF626] font-bold animate-pulse text-glow">Готово</span> | NODE_USR: {session.user.username}
         </p>
 
         {/* Форма вызывает твой серверный экшен createPost */}
@@ -36,7 +36,7 @@ export default async function CreatePostPage() {
           
           {/* Заголовок */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">RECORD_TITLE</label>
+            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">ЗАГОЛОВОК</label>
             <div className="relative">
               <span className="absolute left-3 top-3 text-[#4AF626]/50 font-bold">&gt;</span>
               <input 
@@ -51,7 +51,7 @@ export default async function CreatePostPage() {
 
           {/* Текст поста (Стилизован под консольный редактор nano) */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">DATA_PAYLOAD</label>
+            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">ТЕКСТ ПОСТА</label>
             <div className="relative border border-[#4AF626]/30 focus-within:border-[#4AF626] focus-within:shadow-[0_0_10px_rgba(74,246,38,0.1)] transition-all bg-[#4AF626]/5">
               
               {/* Шапка "редактора" */}
@@ -72,7 +72,7 @@ export default async function CreatePostPage() {
 
           {/* Теги */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">TAGS (comma separated)</label>
+            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">ТЕГИ (разделенные запятой)</label>
             <div className="relative">
               <span className="absolute left-3 top-3 text-[#4AF626]/50 font-bold">#</span>
               <input 
@@ -90,7 +90,7 @@ export default async function CreatePostPage() {
               type="submit" 
               className="border border-[#4AF626] bg-[#0A0A0A] text-[#4AF626] hover:bg-[#4AF626] hover:text-[#0A0A0A] hover:shadow-[0_0_15px_rgba(74,246,38,0.5)] px-8 py-3 text-xs font-bold tracking-widest transition-all uppercase"
             >
-              [ INJECT_DATA ]
+              [ ОПУБЛИКОВАТЬ ]
             </button>
           </div>
 

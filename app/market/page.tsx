@@ -20,9 +20,9 @@ export default async function MarketPage() {
         <div className="absolute right-0 top-0 w-8 h-8 border-r-4 border-t-4 border-[#4AF626]/20"></div>
         
         <div className="text-left flex-1">
-          <h2 className="text-2xl font-bold text-white text-glow mb-2 uppercase tracking-wider">~/market_hub</h2>
+          <h2 className="text-2xl font-bold text-white text-glow mb-2 uppercase tracking-wider">~/market</h2>
           <p className="text-xs text-[#4AF626]/60 font-bold">
-            STATUS: <span className="text-[#4AF626] animate-pulse">ONLINE</span> | Secure trade protocol active
+            Статус: <span className="text-[#4AF626] animate-pulse">ONLINE</span> | Защита активипрована | Всегда проверяйте репутацию продавца перед покупкой
           </p>
         </div>
         
@@ -31,7 +31,7 @@ export default async function MarketPage() {
             [ Мои заказы ]
           </Link>
           <Link href="/market/create" className="bg-[#4AF626] text-[#0A0A0A] px-6 py-2 hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.8)] transition text-center flex-1 md:flex-none uppercase">
-            &gt; SELL_ITEM
+            &gt; Создать листинг
           </Link>
         </div>
       </div>
@@ -39,7 +39,7 @@ export default async function MarketPage() {
       {/* Сетка товаров */}
       {listings.length === 0 ? (
         <div className="text-center text-[#4AF626]/50 py-16 border border-[#4AF626]/30 border-dashed text-lg">
-          NO_ACTIVE_LISTINGS_FOUND
+          В МАРКЕТЕ ЕЩЁ НЕТ АКТИВНЫХ ЛИСТИНГОВ
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -83,7 +83,7 @@ export default async function MarketPage() {
                 </Link>
                 <RoleBadge role={listing.seller.role} />
                 <Link href={`/market/${listing.id}`} className="text-[#4AF626] hover:text-white transition font-bold tracking-widest shrink-0">
-                  [ INFO ]
+                  [ VIEW ]
                 </Link>
               </div>
 

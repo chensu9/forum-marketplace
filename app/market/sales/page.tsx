@@ -20,10 +20,10 @@ export default async function SalesPage() {
       
       <div className="flex justify-between items-end mb-2">
         <Link href="/market" className="text-[#4AF626]/60 hover:text-white hover:text-glow transition font-bold text-[11px]">
-          &lt; RETURN_TO_MARKET
+          &lt; ВЕРНУТСЯ В МАРКЕТ
         </Link>
         <div className="text-[10px] text-yellow-500/80 tracking-widest uppercase">
-          MERCHANT_PROTOCOL: ACTIVE
+          АКТИВНЫЕ ПРОДАЖИ
         </div>
       </div>
 
@@ -31,27 +31,27 @@ export default async function SalesPage() {
         <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-yellow-500/30"></div>
 
         <h1 className="text-xl font-bold text-white text-glow uppercase tracking-widest mb-2">
-          ~// financial_logs : sales
+          ~// financial_logs : ПРОДАЖИ
         </h1>
         <p className="text-[#4AF626]/60 text-xs mb-8 uppercase tracking-widest">
-          NODE: {session.user.username} | TOTAL_SALES: {sales.length}
+          NODE: {session.user.username} | ВСЕГО ПРОДАЖ: {sales.length}
         </p>
 
         {sales.length === 0 ? (
           <div className="border border-dashed border-[#4AF626]/30 p-8 text-center text-[#4AF626]/40 text-sm tracking-widest">
-            _NO_SALES_HISTORY_FOUND_
+            У ВАС ЕЩЁ НЕТ ПРОДАЖ
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-[#4AF626]">
               <thead className="text-[10px] uppercase text-[#4AF626]/60 border-b border-[#4AF626]/30">
                 <tr>
-                  <th className="pb-3 font-bold tracking-widest">TX_ID</th>
-                  <th className="pb-3 font-bold tracking-widest">Item_Name</th>
-                  <th className="pb-3 font-bold tracking-widest">Buyer_Node</th>
-                  <th className="pb-3 font-bold tracking-widest">Income (RUB)</th>
-                  <th className="pb-3 font-bold tracking-widest">Status</th>
-                  <th className="pb-3 font-bold tracking-widest text-right">Timestamp</th>
+                  <th className="pb-3 font-bold tracking-widest">ID</th>
+                  <th className="pb-3 font-bold tracking-widest">Название товара</th>
+                  <th className="pb-3 font-bold tracking-widest">Покупатель</th>
+                  <th className="pb-3 font-bold tracking-widest">Доход (₽)</th>
+                  <th className="pb-3 font-bold tracking-widest">Статус</th>
+                  <th className="pb-3 font-bold tracking-widest text-right">Временная метка</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#4AF626]/10">

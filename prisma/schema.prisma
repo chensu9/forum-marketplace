@@ -48,6 +48,7 @@ model User {
   updatedAt         DateTime  @updatedAt
   reports           Report[]
   isBanned          Boolean   @default(false) // НОВОЕ ПОЛЕ: По умолчанию никто не забанен
+  balance           Float     @default(0)
 
   // --- СВЯЗИ (Relations) ---
   // Форум

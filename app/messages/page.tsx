@@ -52,10 +52,10 @@ export default async function InboxPage() {
       
       <div className="flex justify-between items-end mb-2">
         <Link href="/" className="text-[#4AF626]/60 hover:text-white hover:text-glow transition font-bold text-[11px]">
-          &lt; RETURN_TO_MAIN
+          &lt; НАЗАД НА ГЛАВНУЮ
         </Link>
         <div className="text-[10px] text-yellow-500/80 tracking-widest uppercase">
-          SECURE_COMMS: INBOX
+          ВАШИ ДИАЛОГИ
         </div>
       </div>
 
@@ -63,16 +63,16 @@ export default async function InboxPage() {
         <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-[#4AF626]/30"></div>
 
         <h1 className="text-xl font-bold text-white text-glow uppercase tracking-widest mb-2">
-          ~// ENCRYPTED_INBOX
+          ~// ВХОДЯЩИЕ
         </h1>
         <p className="text-[#4AF626]/60 text-xs mb-8 uppercase tracking-widest">
-          ACTIVE_CHANNELS: {dialogs.length}
+          АКТИВНЫЕ КАНАЛЫ: {dialogs.length}
         </p>
 
         <div className="space-y-3">
           {dialogs.length === 0 ? (
             <div className="border border-dashed border-[#4AF626]/30 p-8 text-center text-[#4AF626]/40 text-sm tracking-widest">
-              _NO_ACTIVE_COMMUNICATIONS_
+              У ВАС ЕЩЁ НЕТ АКТИВНЫХ КОММУНИКАЦИЙ
             </div>
           ) : (
             dialogs.map((dialog) => {
@@ -116,7 +116,7 @@ export default async function InboxPage() {
 
                   {unreadCount > 0 && (
                     <div className="mt-3 inline-block bg-yellow-500 text-[#0A0A0A] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5">
-                      {unreadCount} UNREAD_PACKETS
+                      {unreadCount} НОВЫХ
                     </div>
                   )}
                 </Link>

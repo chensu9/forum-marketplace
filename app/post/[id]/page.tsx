@@ -85,7 +85,7 @@ export default async function SinglePostPage({ params }: { params: Promise<{ id:
       <ViewTracker postId={post.id} />
 
       <Link href="/" className="inline-block text-[#4AF626]/60 hover:text-white hover:text-glow transition mb-2 font-bold text-[11px]">
-        &lt; RETURN_TO_MAIN
+        &lt; Вернуться на главную
       </Link>
 
       {/* ТЕЛО ПОСТА */}
@@ -108,7 +108,7 @@ export default async function SinglePostPage({ params }: { params: Promise<{ id:
             </div>
           </div>
           <div className="text-right shrink-0">
-            <div className="text-[9px] text-[#4AF626]/60 uppercase tracking-widest mb-0.5">TIMESTAMP</div>
+            <div className="text-[9px] text-[#4AF626]/60 uppercase tracking-widest mb-0.5">ВРЕМЯ</div>
             <div className="text-[10px] text-[#4AF626] font-bold">{post.createdAt.toLocaleString("ru-RU")}</div>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default async function SinglePostPage({ params }: { params: Promise<{ id:
       {/* СЕКЦИЯ КОММЕНТАРИЕВ */}
       <div className="border border-[#4AF626]/30 bg-[#0A0A0A]/60 p-4">
         <h2 className="text-sm font-bold text-white text-glow mb-4 flex items-center gap-2">
-          ~/comments_log <span className="text-[#4AF626]/50 text-xs">[{post.comments.length}]</span>
+          ~/Комментарии <span className="text-[#4AF626]/50 text-xs">[{post.comments.length}]</span>
         </h2>
 
         {/* Форма для ГЛАВНОГО (корневого) комментария */}
@@ -158,13 +158,13 @@ export default async function SinglePostPage({ params }: { params: Promise<{ id:
             />
             <div className="flex justify-end border-t border-[#4AF626]/30 p-1.5 bg-[#4AF626]/5">
               <button type="submit" className="border border-[#4AF626] text-[#4AF626] hover:bg-[#4AF626] hover:text-[#0A0A0A] px-4 py-1 text-[10px] font-bold transition uppercase">
-                [ EXECUTE ]
+                [ Отправить ]
               </button>
             </div>
           </form>
         ) : (
           <div className="mb-6 p-3 border border-[#4AF626]/30 border-dashed text-center text-[#4AF626]/50 text-[10px] font-bold tracking-widest">
-            AUTH_REQUIRED. <Link href="/login" className="text-white text-glow hover:underline">RUN login.exe</Link>
+            Авторизация. <Link href="/login" className="text-white text-glow hover:underline">RUN login.exe</Link>
           </div>
         )}
 

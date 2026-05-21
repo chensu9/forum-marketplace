@@ -59,6 +59,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const topUsers = await prisma.user.findMany({
     take: 5, include: { _count: { select: { posts: true } } }, orderBy: { posts: { _count: 'desc' } }
   });
+  const onlineUsers = 0; // TODO: Implement online user tracking
 
   return (
     <div className="w-full font-mono">
@@ -109,10 +110,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         {/* === КОЛОНКА 2: ТРЕНДЫ === */}
         <aside className="border border-[#4AF626]/30 bg-[#0A0A0A]/80 p-3 h-fit shadow-[0_0_15px_rgba(74,246,38,0.03)] hide-on-laptop">
-          <h2 className="text-[10px] font-bold text-[#4AF626]/60 mb-4 border-b border-[#4AF626]/30 pb-2 uppercase tracking-widest">~// Trending_24H</h2>
+          <h2 className="text-[10px] font-bold text-[#4AF626]/60 mb-4 border-b border-[#4AF626]/30 pb-2 uppercase tracking-widest">~// ТРЕНДЫ</h2>
           <div className="space-y-4">
             {trendingPosts.length === 0 ? (
-              <div className="text-[10px] text-[#4AF626]/40 text-center py-4 tracking-widest border border-dashed border-[#4AF626]/20">_NO_HOT_DATA_</div>
+              <div className="text-[10px] text-[#4AF626]/40 text-center py-4 tracking-widest border border-dashed border-[#4AF626]/20">Пока что тут пусто</div>
             ) : (
               trendingPosts.map((post) => (
                 <Link href={`/post/${post.id}`} key={`trend-${post.id}`} className="group block cursor-pointer border-l-2 border-transparent hover:border-[#4AF626] pl-2 transition-all">
@@ -125,9 +126,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     <RoleBadge role={post.author.role} />
                   </div>
                     {post.isHot ? (
-                      <span className="text-[#4AF626] font-bold animate-pulse text-glow uppercase">HOT &lt;1h</span>
+                      <span className="text-[#4AF626] font-bold animate-pulse text-glow uppercase">Активен &lt;1h</span>
                     ) : (
-                      <span className="text-red-500/80 font-bold uppercase">Inactive</span>
+                      <span className="text-red-500/80 font-bold uppercase">Неактивен</span>
                     )}
                   </div>
                 </Link>
@@ -152,17 +153,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {(currentTag || searchQuery) && (
             <div className="p-3 bg-[#4AF626]/5 border border-[#4AF626]/30 text-xs flex items-center justify-between font-bold">
               <div>
-                <span className="text-[#4AF626]/60">FILTERS: </span>
+                <span className="text-[#4AF626]/60">ФИЛЬТРЫ: </span>
                 {currentTag && <span className="text-white text-glow mr-3">#{currentTag}</span>}
                 {searchQuery && <span className="text-white text-glow">"{searchQuery}"</span>}
               </div>
-              <Link href="/" className="text-red-500 hover:text-red-400 hover:text-glow transition">[ DROP ]</Link>
+              <Link href="/" className="text-red-500 hover:text-red-400 hover:text-glow transition">[ СБРОС ]</Link>
             </div>
           )}
 
           <div className="space-y-4">
             {posts.length === 0 ? (
-              <div className="text-center text-[#4AF626]/50 py-12 border border-[#4AF626]/30 border-dashed text-sm">NO_DATA_FOUND</div>
+              <div className="text-center text-[#4AF626]/50 py-12 border border-[#4AF626]/30 border-dashed text-sm">Ничего не найдено</div>
             ) : (
               posts.map((post) => (
                 <div key={post.id} className="p-4 border border-[#4AF626]/30 hover:border-[#4AF626] hover:shadow-[0_0_15px_rgba(74,246,38,0.1)] bg-[#0A0A0A]/60 transition-all group relative">
@@ -203,10 +204,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         {/* === КОЛОНКА 4: ТОП АВТОРОВ === */}
         <aside className="border border-[#4AF626]/30 bg-[#0A0A0A]/80 p-3 h-fit shadow-[0_0_15px_rgba(74,246,38,0.03)]">
-          <h3 className="text-[10px] font-bold text-[#4AF626]/60 mb-4 border-b border-[#4AF626]/30 pb-2 uppercase tracking-widest">~// Top.Users</h3>
+          <h3 className="text-[10px] font-bold text-[#4AF626]/60 mb-4 border-b border-[#4AF626]/30 pb-2 uppercase tracking-widest">~// ТОП АВТОРОВ</h3>
           <div className="space-y-4">
             {topUsers.length === 0 ? (
-              <div className="text-xs text-[#4AF626]/50 text-center py-2">NO_DATA</div>
+              <div className="text-xs text-[#4AF626]/50 text-center py-2">Пока что пусто</div>
             ) : (
               topUsers.map((u, index) => (
                 <div key={u.id} className="flex justify-between items-center text-[11px] group font-bold">
@@ -228,16 +229,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <h3 className="text-[10px] font-bold text-[#4AF626]/60 mb-3 border-b border-[#4AF626]/30 pb-2 uppercase tracking-widest">~// Stats</h3>
             <div className="space-y-2 text-[11px] font-bold">
               <div className="flex justify-between items-center">
-                <span className="text-[#4AF626]/70">USERS:</span>
+                <span className="text-[#4AF626]/70">ПОЛЬЗОВАТЕЛИ:</span>
                 <span className="text-white text-glow">{totalUsers}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[#4AF626]/70">THREADS:</span>
+                <span className="text-[#4AF626]/70">ТЕМЫ:</span>
                 <span className="text-white text-glow">{totalPosts}</span>
               </div>
               <div className="flex justify-between items-center text-green-400 mt-2 pt-2 border-t border-[#4AF626]/20">
-                <span>ONLINE:</span>
-                <span className="animate-pulse">15x</span>
+                <span>В сети:</span>
+                <span className="animate-pulse">{onlineUsers}</span>
               </div>
             </div>
           </div>
