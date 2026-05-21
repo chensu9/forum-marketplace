@@ -1,4 +1,3 @@
-// app/market/create/page.tsx
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -12,61 +11,66 @@ export default async function CreateListingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F0F14] text-white py-10 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/market" className="text-gray-400 hover:text-white transition">
-            ← Назад в маркет
-          </Link>
-          <h1 className="text-2xl font-bold">Разместить объявление</h1>
-        </div>
+    <div className="max-w-2xl mx-auto px-4 py-8 w-full">
+      
+      {/* Заголовок */}
+      <div className="flex items-center gap-4 mb-8">
+        <Link href="/market" className="text-gray-400 hover:text-white transition">
+          ← Назад в маркет
+        </Link>
+        <h1 className="text-xl font-bold text-gray-100">Разместить объявление</h1>
+      </div>
 
-        <form action={createListing} className="nb-card p-6 space-y-6">
+      <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-6 shadow-sm">
+        <form action={createListing} className="space-y-6">
+          
+          {/* Название */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Название товара или услуги
             </label>
             <input
               type="text"
               name="title"
               required
-              className="w-full bg-[#1A1A22] border border-gray-800 rounded-lg p-3 text-white focus:border-[#A855F7] outline-none transition"
+              className="w-full bg-[#272729] border border-[#343536] hover:border-gray-500 focus:border-gray-300 rounded-md p-3 text-sm text-gray-100 outline-none transition-colors"
               placeholder="Например: Дизайн логотипа / Ключ Steam"
             />
           </div>
 
+          {/* Описание */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Описание
             </label>
             <textarea
               name="description"
               required
               rows={6}
-              className="w-full bg-[#1A1A22] border border-gray-800 rounded-lg p-3 text-white focus:border-[#A855F7] outline-none transition resize-y"
+              className="w-full bg-[#272729] border border-[#343536] hover:border-gray-500 focus:border-gray-300 rounded-md p-3 text-sm text-gray-100 outline-none transition-colors resize-y"
               placeholder="Подробно опишите, что вы продаете..."
             />
           </div>
-{/* Поле для Картинки Товара */}
+
+          {/* Картинка */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">
-              Ссылка на изображение (опционально)
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Ссылка на изображение
             </label>
-            <div className="relative">
-              <span className="absolute left-3 top-3 text-[#4AF626]/50 font-bold">&gt;</span>
-              <input 
-                type="url" 
-                name="imageUrl" 
-                placeholder="https://example.com/image.png"
-                className="w-full bg-[#4AF626]/5 border border-[#4AF626]/30 p-3 pl-8 text-sm text-[#4AF626] focus:border-[#4AF626] focus:shadow-[0_0_10px_rgba(74,246,38,0.1)] outline-none transition-all placeholder:text-[#4AF626]/30" 
-              />
-            </div>
-            <p className="text-[9px] text-[#4AF626]/40 mt-2 uppercase tracking-widest">
-              * Рекомендуемый размер: 600x400px. Поддерживаются форматы JPG, PNG, GIF.
+            <input 
+              type="url" 
+              name="imageUrl" 
+              placeholder="https://example.com/image.png"
+              className="w-full bg-[#272729] border border-[#343536] hover:border-gray-500 focus:border-gray-300 rounded-md p-3 text-sm text-gray-100 outline-none transition-colors" 
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              * Рекомендуемый размер: 600x400px. Поддерживаются JPG, PNG, GIF.
             </p>
           </div>
+
+          {/* Цена */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Цена (₽)
             </label>
             <input
@@ -75,13 +79,17 @@ export default async function CreateListingPage() {
               min="0"
               step="1"
               required
-              className="w-full bg-[#1A1A22] border border-gray-800 rounded-lg p-3 text-white focus:border-[#A855F7] outline-none transition"
-              placeholder="999"
+              className="w-full bg-[#272729] border border-[#343536] hover:border-gray-500 focus:border-gray-300 rounded-md p-3 text-sm text-gray-100 outline-none transition-colors"
+              placeholder="0"
             />
           </div>
 
-          <div className="flex justify-end pt-4">
-            <button type="submit" className="nb-button-primary px-8">
+          {/* Кнопка */}
+          <div className="pt-2">
+            <button 
+              type="submit" 
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-md transition shadow-sm text-sm"
+            >
               Опубликовать товар
             </button>
           </div>

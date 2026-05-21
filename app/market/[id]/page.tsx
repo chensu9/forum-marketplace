@@ -1,4 +1,3 @@
-// app/market/[id]/page.tsx
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -17,92 +16,115 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
   if (!listing) notFound();
 
-  // Проверяем, не является ли юзер владельцем товара (чтобы он не купил его сам у себя)
+  // Проверяем, не является ли юзер владельцем товара
   const isOwner = session?.user?.id === listing.sellerId;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 font-mono">
-      <Link href="/market" className="inline-block text-[#4AF626]/60 hover:text-white hover:text-glow transition mb-2 font-bold text-[11px]">
-        &lt; Вернуться в маркет
+    <div className="max-w-5xl mx-auto px-4 py-8 w-full">
+      
+      {/* Кнопка назад */}
+      <Link href="/market" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition text-sm font-medium mb-6">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Вернуться в маркет
       </Link>
 
-      <div className="border border-[#4AF626]/50 bg-[#0A0A0A]/80 p-6 shadow-[0_0_15px_rgba(74,246,38,0.05)] relative">
-        <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-[#4AF626]/30"></div>
-
-        {/* ШАПКА ТОВАРА */}
-        <div className="flex justify-between items-start mb-6 border-b border-[#4AF626]/30 pb-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white text-glow mb-2 uppercase break-all">
-              {listing.title}
-            </h1>
-            <div className="text-[10px] text-[#4AF626]/60 uppercase tracking-widest">
-              ITEM_ID: {listing.id}
+      <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-6 items-start">
+        
+        {/* ======================================= */}
+        {/* ЛЕВАЯ КОЛОНКА: ФОТО И ОПИСАНИЕ */}
+        {/* ======================================= */}
+        <div className="space-y-6">
+          <div className="bg-[#1A1A1B] border border-[#343536] rounded-md overflow-hidden">
+            
+            {/* Блок картинки */}
+            {listing.imageUrl ? (
+              <div className="w-full bg-[#0A0A0B] flex items-center justify-center border-b border-[#343536]">
+                <img 
+                  src={listing.imageUrl} 
+                  alt={listing.title} 
+                  className="max-h-[500px] w-auto object-contain"
+                />
+              </div>
+            ) : (
+               <div className="w-full h-64 bg-[#272729] flex items-center justify-center border-b border-[#343536] text-gray-500">
+                 <svg className="w-16 h-16 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+               </div>
+            )}
+            
+            {/* Текст описания */}
+            <div className="p-6">
+              <h2 className="text-lg font-bold text-gray-100 mb-4 border-b border-[#343536] pb-2">
+                Описание товара
+              </h2>
+              <p className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed break-words">
+                {listing.description}
+              </p>
             </div>
-          </div>
-          <div className="text-right shrink-0 ml-4">
-            <div className="text-[10px] text-[#4AF626]/60 uppercase tracking-widest mb-1">ЦЕНА</div>
-            <div className="text-xl font-bold text-[#4AF626] text-glow">{listing.price} RUB</div>
           </div>
         </div>
 
-        {/* ВЫВОД КАРТИНКИ (если есть) */}
-        {listing.imageUrl && (
-          <div className="mb-6 border border-[#4AF626]/30 max-h-[400px] overflow-hidden group relative flex items-center justify-center bg-[#4AF626]/5">
-            <img 
-              src={listing.imageUrl} 
-              alt={listing.title} 
-              className="max-w-full max-h-[400px] object-contain grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
-            />
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* ======================================= */}
+        {/* ПРАВАЯ КОЛОНКА: ЦЕНА, ПОКУПКА, ПРОДАВЕЦ */}
+        {/* ======================================= */}
+        <div className="space-y-6 md:sticky md:top-20">
           
-          {/* ОПИСАНИЕ ТОВАРА */}
-          <div className="md:col-span-2">
-            <h3 className="text-[10px] text-[#4AF626]/50 uppercase tracking-widest mb-2 border-b border-[#4AF626]/20 pb-1">
-              ~// Описание
-            </h3>
-            <p className="text-[#4AF626]/80 text-sm whitespace-pre-wrap leading-relaxed break-words">
-              {listing.description}
-            </p>
+          {/* Карточка покупки */}
+          <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-6">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-100 mb-2 break-words leading-tight">
+              {listing.title}
+            </h1>
+            <div className="text-xs text-gray-500 font-mono mb-6 bg-[#272729] w-fit px-2 py-1 rounded">
+              ID: {listing.id.split('-')[0]}
+            </div>
+
+            <div className="text-3xl font-black text-white mb-6">
+              {listing.price} <span className="text-blue-500 text-2xl">₽</span>
+            </div>
+
+            {/* Логика отображения кнопок */}
+            <div className="w-full">
+              {session?.user ? (
+                isOwner ? (
+                  <div className="w-full bg-[#272729]/50 text-gray-400 py-3 rounded-md text-center text-sm font-bold border border-[#343536] border-dashed">
+                    Это ваше объявление
+                  </div>
+                ) : (
+                  // Оборачиваем старую кнопку, чтобы она растянулась на 100%
+                  <div className="[&>button]:w-full [&>button]:py-3 [&>button]:text-sm [&>button]:rounded-md [&>button]:font-bold shadow-sm">
+                    <EscrowButton listingId={listing.id} />
+                  </div>
+                )
+              ) : (
+                <Link href="/login" className="block w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-md text-center text-sm font-bold transition shadow-sm">
+                  Войти для покупки
+                </Link>
+              )}
+            </div>
           </div>
 
-          {/* ИНФО О ПРОДАВЦЕ И КНОПКА ПОКУПКИ */}
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-[10px] text-[#4AF626]/50 uppercase tracking-widest mb-2 border-b border-[#4AF626]/20 pb-1">
-                ~// Информация о продавце
-              </h3>
-              <div className="bg-[#4AF626]/5 border border-[#4AF626]/20 p-3">
-                <div className="flex items-center mb-2">
-                  <Link href={`/profile/${listing.seller.username}`} className="text-white hover:text-glow font-bold uppercase text-sm truncate">
-                    usr:{listing.seller.username}
-                  </Link>
+          {/* Карточка продавца */}
+          <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-6">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-[#343536] pb-2">
+              Информация о продавце
+            </h3>
+            
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-tr from-gray-600 to-gray-500 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0">
+                {listing.seller.username.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <Link href={`/profile/${listing.seller.username}`} className="font-bold text-gray-200 hover:underline text-base truncate flex items-center gap-1.5 mb-0.5">
+                  {listing.seller.username}
                   <RoleBadge role={listing.seller.role} />
-                </div>
-                <div className="text-[10px] text-[#4AF626]/60">
+                </Link>
+                <div className="text-xs text-gray-500">
                   На сайте с {listing.seller.createdAt.toLocaleDateString("ru-RU")}
                 </div>
               </div>
             </div>
 
-            <div>
-              {session?.user ? (
-                isOwner ? (
-                  <div className="border border-[#4AF626]/30 border-dashed text-[#4AF626]/50 p-4 text-center text-[10px] uppercase tracking-widest font-bold">
-                    [ THIS_IS_YOUR_LISTING ]
-                  </div>
-                ) : (
-                  // ВЫВОДИМ НАШУ НОВУЮ КНОПКУ ГАРАНТА
-                  <EscrowButton listingId={listing.id} />
-                )
-              ) : (
-                <div className="border border-[#4AF626]/30 border-dashed text-[#4AF626]/50 p-4 text-center text-[10px] uppercase tracking-widest font-bold">
-                  <Link href="/login" className="text-white hover:underline hover:text-glow transition">RUN login.exe</Link> TO PURCHASE
-                </div>
-              )}
-            </div>
           </div>
         </div>
 

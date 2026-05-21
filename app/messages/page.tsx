@@ -48,34 +48,29 @@ export default async function InboxPage() {
   const dialogs = Array.from(dialogsMap.values());
 
   return (
-    <div className="max-w-4xl mx-auto font-mono space-y-6">
+    <div className="max-w-4xl mx-auto px-4 py-8 w-full">
       
-      <div className="flex justify-between items-end mb-2">
-        <Link href="/" className="text-[#4AF626]/60 hover:text-white hover:text-glow transition font-bold text-[11px]">
-          &lt; НАЗАД НА ГЛАВНУЮ
+      {/* Шапка страницы */}
+      <div className="mb-6">
+        <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition text-sm font-medium mb-4">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          Вернуться на главную
         </Link>
-        <div className="text-[10px] text-yellow-500/80 tracking-widest uppercase">
-          ВАШИ ДИАЛОГИ
-        </div>
+        <h1 className="text-2xl font-bold text-gray-100">Сообщения</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Активные диалоги: {dialogs.length}
+        </p>
       </div>
 
-      <div className="border border-[#4AF626]/50 bg-[#0A0A0A]/90 p-6 shadow-[0_0_15px_rgba(74,246,38,0.05)] relative">
-        <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-[#4AF626]/30"></div>
-
-        <h1 className="text-xl font-bold text-white text-glow uppercase tracking-widest mb-2">
-          ~// ВХОДЯЩИЕ
-        </h1>
-        <p className="text-[#4AF626]/60 text-xs mb-8 uppercase tracking-widest">
-          АКТИВНЫЕ КАНАЛЫ: {dialogs.length}
-        </p>
-
-        <div className="space-y-3">
-          {dialogs.length === 0 ? (
-            <div className="border border-dashed border-[#4AF626]/30 p-8 text-center text-[#4AF626]/40 text-sm tracking-widest">
-              У ВАС ЕЩЁ НЕТ АКТИВНЫХ КОММУНИКАЦИЙ
-            </div>
-          ) : (
-            dialogs.map((dialog) => {
+      {/* Контейнер со списком */}
+      <div className="bg-[#1A1A1B] border border-[#343536] rounded-md overflow-hidden shadow-sm">
+        {dialogs.length === 0 ? (
+          <div className="p-10 text-center text-gray-500 text-sm">
+            У вас пока нет активных диалогов. Напишите кому-нибудь!
+          </div>
+        ) : (
+          <div className="divide-y divide-[#343536]">
+            {dialogs.map((dialog) => {
               const { partner, lastMessage, unreadCount } = dialog;
               const isMeSender = lastMessage.senderId === session.user.id;
 
@@ -83,48 +78,52 @@ export default async function InboxPage() {
                 <Link 
                   key={partner.id} 
                   href={`/messages/${partner.username}`}
-                  className={`block border p-4 transition group relative ${
-                    unreadCount > 0 
-                      ? "border-yellow-500/50 bg-yellow-500/5 hover:border-yellow-500" 
-                      : "border-[#4AF626]/20 bg-[#0A0A0A] hover:border-[#4AF626]"
+                  className={`flex items-center gap-4 p-4 transition-colors hover:bg-[#272729] ${
+                    unreadCount > 0 ? "bg-[#272729]/30" : "bg-transparent"
                   }`}
                 >
-                  {unreadCount > 0 && (
-                    <div className="absolute top-0 right-0 w-2 h-2 bg-yellow-500 animate-pulse"></div>
-                  )}
+                  {/* Аватарка собеседника */}
+                  <div className="w-12 h-12 bg-gradient-to-tr from-gray-600 to-gray-500 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0 relative">
+                    {partner.username.charAt(0).toUpperCase()}
+                    {/* Точка, если есть новые сообщения */}
+                    {unreadCount > 0 && (
+                      <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-orange-500 border-2 border-[#1A1A1B] rounded-full"></div>
+                    )}
+                  </div>
 
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center">
-                      <span className={`font-bold text-sm uppercase tracking-wider ${unreadCount > 0 ? "text-yellow-500" : "text-[#4AF626] group-hover:text-white"}`}>
-                        usr:{partner.username}
+                  {/* Основная информация диалога */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold text-sm truncate ${unreadCount > 0 ? "text-gray-100" : "text-gray-300"}`}>
+                          {partner.username}
+                        </span>
+                        <RoleBadge role={partner.role} />
+                      </div>
+                      <span className="text-xs text-gray-500 shrink-0 ml-2">
+                        {lastMessage.createdAt.toLocaleDateString("ru-RU")}
                       </span>
-                      <RoleBadge role={partner.role} />
                     </div>
-                    <span className="text-[10px] text-[#4AF626]/50 shrink-0 ml-4">
-                      [{lastMessage.createdAt.toLocaleDateString("ru-RU")} {lastMessage.createdAt.toLocaleTimeString("ru-RU", {hour: "2-digit", minute:"2-digit"})}]
-                    </span>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className={`truncate ${unreadCount > 0 && !isMeSender ? "text-gray-200 font-semibold" : "text-gray-400"}`}>
+                        {isMeSender && <span className="text-gray-500 mr-1">Вы:</span>}
+                        {lastMessage.content}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="text-[#4AF626]/40 font-bold shrink-0">
-                      {isMeSender ? "YOU:" : "RCV:"}
-                    </span>
-                    <span className={`truncate ${unreadCount > 0 && !isMeSender ? "text-white font-bold" : "text-[#4AF626]/70"}`}>
-                      {lastMessage.content}
-                    </span>
-                  </div>
-
+                  {/* Бейджик с цифрой справа (если > 0) */}
                   {unreadCount > 0 && (
-                    <div className="mt-3 inline-block bg-yellow-500 text-[#0A0A0A] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5">
-                      {unreadCount} НОВЫХ
+                    <div className="shrink-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {unreadCount}
                     </div>
                   )}
                 </Link>
               );
-            })
-          )}
-        </div>
-
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

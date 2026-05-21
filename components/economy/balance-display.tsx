@@ -7,22 +7,20 @@ import { getUserBalance } from "@/lib/actions/economy";
 export default function BalanceDisplay() {
   const [balance, setBalance] = useState<number | null>(null);
 
-  // Стучимся на сервер за балансом
   useEffect(() => {
-    getUserBalance().then((bal) => {
-      setBalance(bal);
-    }).catch(console.error);
+    getUserBalance().then(setBalance).catch(console.error);
   }, []);
 
-  // Пока грузится, ничего не показываем
   if (balance === null) return null;
 
   return (
     <Link 
       href="/deposit" 
-      className="text-[#4AF626] font-bold tracking-widest text-[11px] sm:text-xs uppercase transition border border-[#4AF626]/30 px-2 py-1 hover:bg-[#4AF626] hover:text-[#0A0A0A] shrink-0"
+      className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-[#272729] rounded-full transition text-sm font-medium text-gray-200"
+      title="Пополнить баланс"
     >
-      [ {balance.toFixed(2)} RUB ]
+      <span className="text-blue-500 font-bold">₽</span>
+      {balance.toFixed(2)}
     </Link>
   );
 }

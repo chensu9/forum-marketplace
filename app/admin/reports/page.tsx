@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { dismissReport, deleteReportedPost } from "@/lib/actions/admin";
+import RoleBadge from "@/components/user/role-badge";
 
 export default async function AdminReportsPage() {
   const session = await auth();
@@ -11,96 +12,90 @@ export default async function AdminReportsPage() {
   const currentUser = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!currentUser || (currentUser.role !== "ADMIN" && currentUser.role !== "MODERATOR")) redirect("/");
 
-  // Достаем все активные жалобы
   const pendingReports = await prisma.report.findMany({
     where: { status: "PENDING" },
     include: {
       post: { include: { author: true } },
-      user: true, // Тот, кто отправил жалобу
+      user: true, 
     },
     orderBy: { createdAt: "desc" }
   });
 
   return (
-    <div className="max-w-5xl mx-auto font-mono space-y-6">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       
-      <div className="flex justify-between items-end mb-2">
-        <Link href="/admin" className="text-yellow-500/60 hover:text-yellow-500 hover:text-glow transition font-bold text-[11px]">
-          &lt; ABORT_TO_COMMAND_CENTER
+      {/* Шапка */}
+      <div className="mb-8">
+        <Link href="/admin" className="text-sm text-gray-500 hover:text-gray-300 transition mb-2 inline-block">
+          ← Назад в админ-панель
         </Link>
-        <div className="text-[10px] text-yellow-500/50 tracking-widest uppercase">
-          MODERATION_PROTOCOL: ACTIVE
-        </div>
+        <h1 className="text-2xl font-bold text-gray-100">Жалобы (Reports)</h1>
+        <p className="text-gray-400 text-sm mt-1">
+          Всего активных жалоб: <span className="text-white font-bold">{pendingReports.length}</span>
+        </p>
       </div>
 
-      <div className="border border-yellow-500/50 bg-[#0A0A0A]/90 p-6 shadow-[0_0_20px_rgba(234,179,8,0.1)] relative">
-        <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-yellow-500/30"></div>
-
-        <h1 className="text-xl font-bold text-yellow-500 text-glow uppercase tracking-widest mb-2 flex items-center gap-3">
-          [ MODULE: REPORTS ]
-        </h1>
-        <p className="text-yellow-500/60 text-xs mb-8 uppercase tracking-widest">
-          PENDING_FLAGS: <span className={pendingReports.length > 0 ? "text-white animate-pulse" : "text-white"}>{pendingReports.length}</span>
-        </p>
-
-        <div className="space-y-4">
-          {pendingReports.length === 0 ? (
-            <div className="border border-dashed border-yellow-500/30 p-8 text-center text-yellow-500/40 text-sm tracking-widest uppercase">
-              _NO_VIOLATIONS_DETECTED_
-            </div>
-          ) : (
-            pendingReports.map((report) => (
-              <div key={report.id} className="border border-yellow-500/30 bg-yellow-500/5 p-4 flex flex-col md:flex-row gap-4 justify-between items-start">
+      {/* Список жалоб */}
+      <div className="bg-[#1A1A1B] border border-[#343536] rounded-md overflow-hidden">
+        {pendingReports.length === 0 ? (
+          <div className="p-12 text-center text-gray-500 text-sm">
+            Жалоб нет. Всё чисто!
+          </div>
+        ) : (
+          <div className="divide-y divide-[#343536]">
+            {pendingReports.map((report) => (
+              <div key={report.id} className="p-6 flex flex-col md:flex-row gap-6 items-start hover:bg-[#272729]/30 transition-colors">
                 
                 {/* Инфо о жалобе */}
-                <div className="flex-1 space-y-2 min-w-0 break-words">
-                  <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-yellow-500/60 min-w-0 break-words">
-                    <span>FLAG_ID: {report.id.slice(0, 8)}</span>
-                    <span>|</span>
-                    <span>Reported_By: {report.user.username}</span>
-                    <span>|</span>
+                <div className="flex-1 space-y-3 min-w-0">
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <span className="bg-[#272729] px-2 py-0.5 rounded text-gray-300">ID: {report.id.slice(0, 8)}</span>
+                    <span>•</span>
+                    <span>От: <span className="font-semibold text-gray-200">{report.user.username}</span></span>
+                    <span>•</span>
                     <span>{report.createdAt.toLocaleDateString("ru-RU")}</span>
                   </div>
                   
-                  <div className="text-sm font-bold text-white">
-                    Reason: <span className="text-yellow-500 text-glow">{report.reason}</span>
+                  <div className="text-sm text-gray-200">
+                    Причина: <span className="font-bold text-gray-100">{report.reason}</span>
                   </div>
 
                   {report.post ? (
-                    <div className="mt-4 border-l-2 border-yellow-500/30 pl-3 min-w-0 break-words">
-                      <div className="text-[10px] uppercase text-[#4AF626]/60 mb-1">Target_Record:</div>
-                      <Link href={`/post/${report.post.id}`} target="_blank" className="text-lg font-bold text-[#4AF626] hover:text-white transition min-w-0 break-words">
+                    <div className="bg-[#272729] p-4 rounded border border-[#343536] mt-2">
+                      <Link href={`/post/${report.post.id}`} target="_blank" className="font-bold text-blue-400 hover:underline block mb-1">
                         {report.post.title}
                       </Link>
-                      <p className="text-xs text-[#4AF626]/70 line-clamp-2 mt-1">{report.post.content}</p>
-                      <div className="text-[10px] text-[#4AF626]/50 mt-2">Author: {report.post.author.username}</div>
+                      <p className="text-xs text-gray-400 line-clamp-2 italic">"{report.post.content}"</p>
+                      <div className="text-[10px] text-gray-500 mt-2">Автор: {report.post.author.username}</div>
                     </div>
                   ) : (
-                    <div className="mt-4 text-red-500 text-xs font-bold">[ TARGET_RECORD_DELETED ]</div>
+                    <div className="text-red-400 text-xs font-bold bg-red-500/10 p-3 rounded border border-red-500/20">
+                      [ Пост был удален ]
+                    </div>
                   )}
                 </div>
 
-                {/* Действия (Кнопки) */}
-                <div className="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-4 md:mt-0">
+                {/* Действия */}
+                <div className="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto">
                   {report.post && (
-                    <form action={async () => { "use server"; await deleteReportedPost(report.postId); }} className="flex-1 md:flex-none">
-                      <button className="w-full text-[11px] border border-red-500 text-red-500 px-4 py-2 hover:bg-red-500 hover:text-[#0A0A0A] font-bold uppercase transition tracking-widest shadow-[0_0_10px_rgba(239,68,68,0.1)]">
-                        [ DROP_POST ]
+                    <form action={async () => { "use server"; await deleteReportedPost(report.postId); }}>
+                      <button className="w-full text-xs font-bold uppercase tracking-wide bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition shadow-sm">
+                        Удалить пост
                       </button>
                     </form>
                   )}
                   
-                  <form action={async () => { "use server"; await dismissReport(report.id); }} className="flex-1 md:flex-none">
-                    <button className="w-full text-[11px] border border-yellow-500/50 text-yellow-500 px-4 py-2 hover:bg-yellow-500 hover:text-[#0A0A0A] font-bold uppercase transition tracking-widest">
-                      [ DISMISS_FLAG ]
+                  <form action={async () => { "use server"; await dismissReport(report.id); }}>
+                    <button className="w-full text-xs font-bold uppercase tracking-wide bg-[#272729] hover:bg-[#343536] border border-[#343536] text-gray-300 px-4 py-2 rounded transition">
+                      Отклонить
                     </button>
                   </form>
                 </div>
 
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

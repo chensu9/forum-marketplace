@@ -1,4 +1,3 @@
-// app/profile/[username]/page.tsx
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -23,152 +22,78 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const isOwnProfile = session?.user?.id === user.id;
 
   return (
-    <div className="w-full font-mono relative min-h-screen">
+    <div className="max-w-[1200px] mx-auto px-4 py-6 w-full">
       
-      {/* ЖИВОЙ КАСТОМНЫЙ ФОН */}
-      {user.profileBackground && (
-        <div className="absolute inset-0 z-0 opacity-15 overflow-hidden select-none pointer-events-none">
-          {user.profileBackground.endsWith(".mp4") || user.profileBackground.endsWith(".webm") ? (
+      {/* =========================================
+          ШАПКА / БАННЕР ПРОФИЛЯ
+          ========================================= */}
+      <div className="relative w-full h-48 sm:h-64 bg-[#272729] rounded-t-xl overflow-hidden border border-[#343536]">
+        {user.profileBackground ? (
+          user.profileBackground.endsWith(".mp4") || user.profileBackground.endsWith(".webm") ? (
             <video
               src={user.profileBackground}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover grayscale brightness-50"
+              autoPlay loop muted playsInline
+              className="w-full h-full object-cover opacity-80"
             />
           ) : (
             <img
               src={user.profileBackground}
               alt="Profile Background"
-              className="w-full h-full object-cover grayscale brightness-50"
+              className="w-full h-full object-cover opacity-80"
             />
-          )}
-        </div>
-      )}
+          )
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-blue-900 to-indigo-800 opacity-80"></div>
+        )}
 
-      {/* ОСНОВНОЙ КОНТЕНТ */}
-      <div className="relative z-10 space-y-6 max-w-[1200px] mx-auto">
+        {/* Кнопка смены фона для владельца */}
+        {isOwnProfile && (
+          <div className="absolute top-4 right-4 z-10">
+            <BgUploadButton />
+          </div>
+        )}
+      </div>
+
+      {/* =========================================
+          ОСНОВНАЯ 2-КОЛОНОЧНАЯ СЕТКА
+          ========================================= */}
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_312px] gap-6 mt-6 items-start">
         
-        {/* КАРТОЧКА ПРОФИЛЯ */}
-        <div className="border border-[#4AF626]/50 bg-[#0A0A0A]/80 p-6 sm:p-8 shadow-[0_0_20px_rgba(74,246,38,0.05)] relative overflow-hidden">
+        {/* ЛЕВАЯ КОЛОНКА (Лента постов) */}
+        <div className="flex-1 space-y-4 order-2 md:order-1">
           
-          {/* ЖЕСТКАЯ СЕТКА GRID (Вместо Flexbox) */}
-          <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 relative z-10">
-            
-            {/* =========================================
-                ЛЕВАЯ КОЛОНКА (Аватар + Стата)
-                ========================================= */}
-            <div className="flex flex-col">
-              
-              {/* Аватар */}
-              <div className="w-32 h-32 border-2 border-[#4AF626] flex items-center justify-center bg-[#4AF626]/5 group overflow-hidden crt-overlay mb-6">
-                {user.image ? (
-                  <img src={user.image} alt={user.username} className="w-full h-full object-cover grayscale group-hover:scale-110 transition-transform" />
-                ) : (
-                  <span className="text-5xl text-[#4AF626] font-bold text-glow">{user.username[0].toUpperCase()}</span>
-                )}
-              </div>
-
-              {/* Статистика */}
-              <div className="w-full space-y-3 text-xs font-bold text-[#4AF626]/80">
-                <div className="flex items-center gap-2 mb-4 text-[#4AF626]/50">
-                  <span className="w-2 h-2 bg-[#4AF626] animate-pulse"></span>
-                  <span className="text-[10px] uppercase tracking-widest">Sys_Status: Active</span>
-                </div>
-                
-                <div className="flex justify-between items-end border-b border-[#4AF626]/20 pb-1">
-                  <span className="text-[#4AF626]/50 uppercase tracking-widest text-[9px]">Threads</span>
-                  <span className="text-white text-glow text-sm">{user._count.posts}</span>
-                </div>
-                <div className="flex justify-between items-end border-b border-[#4AF626]/20 pb-1">
-                  <span className="text-[#4AF626]/50 uppercase tracking-widest text-[9px]">Logs</span>
-                  <span className="text-white text-glow text-sm">{user._count.comments}</span>
-                </div>
-                <div className="flex justify-between items-end border-b border-[#4AF626]/20 pb-1">
-                  <span className="text-[#4AF626]/50 uppercase tracking-widest text-[9px]">Registered</span>
-                  <span className="text-[#4AF626]">{user.createdAt.toLocaleDateString("ru-RU")}</span>
-                </div>
-              </div>
-
+          {/* Фейковые вкладки для красоты (как на Reddit) */}
+          <div className="flex gap-2 mb-2">
+            <div className="px-4 py-2 bg-[#272729] text-gray-100 text-sm font-bold rounded-full cursor-default">
+              Посты
             </div>
-
-            {/* =========================================
-                ПРАВАЯ КОЛОНКА (Имя + Кнопки + Био)
-                ========================================= */}
-            <div className="flex flex-col min-w-0">
-              
-              {/* Верхняя строка: Имя (слева) + Кнопки (справа) */}
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
-                
-                <h1 className="text-3xl sm:text-4xl font-bold text-white text-glow uppercase tracking-wider leading-none mt-1 truncate">
-                  {user.username}
-                  <RoleBadge role={user.role} />
-                </h1>
-
-                {/* КНОПКИ (Прижаты вправо) */}
-                <div className="flex gap-3 shrink-0 h-fit">
-                  {isOwnProfile ? (
-                    <>
-                      <Link href="/settings" className="flex items-center justify-center border border-[#4AF626] text-[#4AF626] px-4 py-2 hover:bg-[#4AF626] hover:text-[#0A0A0A] text-[11px] sm:text-sm font-bold transition uppercase shadow-[0_0_10px_rgba(74,246,38,0.1)]">
-                        [ CONFIG ]
-                      </Link>
-                      <BgUploadButton />
-                    </>
-                  ) : (
-                    session?.user && (
-                      <Link href={`/messages/${user.username}`} className="flex items-center justify-center border border-yellow-500 text-yellow-500 px-4 py-2 hover:bg-yellow-500 hover:text-[#0A0A0A] text-[11px] sm:text-sm font-bold transition uppercase shadow-[0_0_10px_rgba(234,179,8,0.1)]">
-                        [ ENCRYPTED_MSG ]
-                      </Link>
-                    )
-                  )}
-                </div>
-                
-              </div>
-
-              {/* БИО */}
-              <div className="w-full border border-[#4AF626]/20 bg-[#0A0A0A]/80 p-5 text-sm leading-relaxed text-[#4AF626]/80 flex-1 min-h-[120px]">
-                <h3 className="text-[10px] font-bold text-[#4AF626]/50 mb-3 border-b border-[#4AF626]/30 pb-2 uppercase tracking-widest">~// Bio_Payload</h3>
-                {user.bio ? (
-                  <p className="whitespace-pre-wrap break-words">{user.bio}</p>
-                ) : (
-                  <p className="text-[#4AF626]/40 text-xs tracking-widest py-4">_NO_BIO_RECORD_FOUND_</p>
-                )}
-              </div>
-
+            <div className="px-4 py-2 text-gray-500 hover:bg-[#272729] hover:text-gray-300 transition rounded-full text-sm font-semibold cursor-pointer">
+              Комментарии
             </div>
           </div>
-        </div>
 
-        {/* =========================================
-            ИСТОРИЯ ПОСТОВ
-            ========================================= */}
-        <div className="border border-[#4AF626]/30 bg-[#0A0A0A]/60 p-6 relative">
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-[#4AF626]/20"></div>
-          <h2 className="text-lg font-bold text-white text-glow mb-6 uppercase border-b border-[#4AF626]/30 pb-2 tracking-widest">
-            ~// execution_history (Threads)
-          </h2>
-
-          <div className="space-y-4">
+          <div className="space-y-3">
             {user.posts.length === 0 ? (
-              <div className="text-center text-[#4AF626]/40 py-8 border border-[#4AF626]/20 border-dashed text-sm tracking-widest">
-                _NO_ACTIVITY_DETECTED_
+              <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-10 text-center text-gray-500 text-sm">
+                Пользователь пока ничего не публиковал
               </div>
             ) : (
               user.posts.map((post) => (
-                <div key={post.id} className="p-4 border border-[#4AF626]/20 hover:border-[#4AF626] bg-[#0A0A0A] transition group relative overflow-hidden">
-                   <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#4AF626] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="flex justify-between items-center mb-2">
-                    <Link href={`/post/${post.id}`} className="text-[#4AF626] font-bold group-hover:text-white group-hover:text-glow transition text-lg tracking-wide break-all">
-                      {post.title}
-                    </Link>
-                    <span className="text-xs text-[#4AF626]/50 ml-4 shrink-0">[{post.createdAt.toLocaleDateString("ru-RU")}]</span>
+                <div key={post.id} className="bg-[#1A1A1B] border border-[#343536] hover:border-[#818384] rounded-md transition-colors p-4 block">
+                  <div className="text-xs text-gray-400 mb-1.5 flex items-center gap-2">
+                    <span className="font-medium">Опубликовано</span>
+                    <span>• {post.createdAt.toLocaleDateString("ru-RU")}</span>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-[#4AF626]/60">
-                    <span>V:{post.views}</span>
-                    <Link href={`/post/${post.id}`} className="hover:text-white transition font-bold tracking-widest">
-                      [ READ_DATA ]
-                    </Link>
+                  <Link href={`/post/${post.id}`} className="block">
+                    <h3 className="text-lg font-semibold text-gray-100 hover:underline mb-3 leading-tight break-words">
+                      {post.title}
+                    </h3>
+                  </Link>
+                  <div className="flex items-center gap-4 text-xs font-semibold text-gray-400">
+                    <div className="flex items-center gap-1.5">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      {post.views} Просмотров
+                    </div>
                   </div>
                 </div>
               ))
@@ -176,6 +101,70 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           </div>
         </div>
 
+        {/* ПРАВАЯ КОЛОНКА (Сайдбар с инфой о юзере) */}
+        <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4 relative z-10 md:-mt-20 order-1 md:order-2 shadow-lg">
+          
+          {/* Аватар (Наполовину заходит на баннер) */}
+          <div className="w-24 h-24 bg-[#1A1A1B] rounded-full p-1 mb-3 mx-auto md:mx-0 -mt-16 md:-mt-0">
+            <div className="w-full h-full bg-gradient-to-tr from-gray-600 to-gray-500 rounded-full flex items-center justify-center text-4xl text-white font-bold overflow-hidden border border-[#343536]">
+              {user.image ? (
+                <img src={user.image} alt={user.username} className="w-full h-full object-cover" />
+              ) : (
+                user.username[0].toUpperCase()
+              )}
+            </div>
+          </div>
+
+          <h1 className="text-xl font-bold text-gray-100 flex items-center justify-center md:justify-start gap-2 truncate">
+            {user.username}
+            <RoleBadge role={user.role} />
+          </h1>
+          <div className="text-sm text-gray-500 text-center md:text-left mb-4">u/{user.username}</div>
+
+          {/* Био */}
+          <div className="mb-6">
+            {user.bio ? (
+              <p className="text-sm text-gray-300 whitespace-pre-wrap break-words">{user.bio}</p>
+            ) : (
+              <p className="text-sm text-gray-500 italic">Описание профиля отсутствует.</p>
+            )}
+          </div>
+
+          {/* Статистика */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <div className="text-xl font-bold text-gray-100">{user._count.posts}</div>
+              <div className="text-xs text-gray-500">Постов</div>
+            </div>
+            <div>
+              <div className="text-xl font-bold text-gray-100">{user._count.comments}</div>
+              <div className="text-xs text-gray-500">Комментариев</div>
+            </div>
+          </div>
+
+          {/* Дата регистрации */}
+          <div className="text-xs text-gray-500 border-t border-[#343536] pt-4 mb-6 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            Регистрация: {user.createdAt.toLocaleDateString("ru-RU")}
+          </div>
+
+          {/* Кнопки действий */}
+          <div className="space-y-3">
+            {isOwnProfile ? (
+              <Link href="/settings" className="flex items-center justify-center bg-gray-200 hover:bg-white text-black font-semibold px-4 py-2 rounded-full transition text-sm">
+                Настройки профиля
+              </Link>
+            ) : (
+              session?.user && (
+                <Link href={`/messages/${user.username}`} className="flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-full transition text-sm gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                  Отправить сообщение
+                </Link>
+              )
+            )}
+          </div>
+
+        </div>
       </div>
     </div>
   );

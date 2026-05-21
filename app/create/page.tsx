@@ -12,90 +12,82 @@ export default async function CreatePostPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto font-mono space-y-6">
+    <div className="max-w-2xl mx-auto px-4 py-8 w-full">
       
-      <Link href="/" className="inline-block text-[#4AF626]/60 hover:text-white hover:text-glow transition mb-2 font-bold text-[11px]">
-        &lt; Отменить и вернуться в меню
-      </Link>
-
-      <div className="border border-[#4AF626]/50 bg-[#0A0A0A]/80 p-6 sm:p-8 shadow-[0_0_15px_rgba(74,246,38,0.05)] relative overflow-hidden">
-        
-        {/* Декоративные элементы */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-[#4AF626]/30"></div>
-        <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-[#4AF626]/20"></div>
-
-        <h1 className="text-xl sm:text-2xl font-bold text-white text-glow mb-2 uppercase tracking-widest">
-          ~// thread_injector.exe
+      {/* Заголовок страницы */}
+      <div className="flex items-center justify-between mb-6 border-b border-[#343536] pb-4">
+        <h1 className="text-xl font-bold text-gray-100">
+          Создать пост
         </h1>
-        <p className="text-[#4AF626]/60 text-xs mb-8 uppercase tracking-widest">
-          Статус: <span className="text-[#4AF626] font-bold animate-pulse text-glow">Готово</span> | NODE_USR: {session.user.username}
-        </p>
+        <div className="text-xs text-gray-500 font-medium bg-[#272729] px-3 py-1 rounded-full">
+          Автор: {session.user.username}
+        </div>
+      </div>
 
-        {/* Форма вызывает твой серверный экшен createPost */}
-        <form action={createPost} className="space-y-6">
+      <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4 sm:p-6 shadow-sm">
+        
+        <form action={createPost} className="space-y-4">
           
-          {/* Заголовок */}
+          {/* Поле: Заголовок */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">ЗАГОЛОВОК</label>
-            <div className="relative">
-              <span className="absolute left-3 top-3 text-[#4AF626]/50 font-bold">&gt;</span>
-              <input 
-                type="text" 
-                name="title" 
-                required 
-                placeholder="Enter title..."
-                className="w-full bg-[#4AF626]/5 border border-[#4AF626]/30 p-3 pl-8 text-sm text-[#4AF626] focus:border-[#4AF626] focus:shadow-[0_0_10px_rgba(74,246,38,0.1)] outline-none transition-all placeholder:text-[#4AF626]/30" 
-              />
-            </div>
+            <input 
+              type="text" 
+              name="title" 
+              required 
+              maxLength={300}
+              placeholder="Заголовок"
+              className="w-full bg-transparent border border-[#343536] hover:border-gray-500 focus:border-gray-300 focus:bg-[#1A1A1B] rounded-md p-3 text-gray-100 font-semibold placeholder-gray-500 outline-none transition-colors" 
+            />
           </div>
 
-          {/* Текст поста (Стилизован под консольный редактор nano) */}
+          {/* Поле: Текст поста */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">ТЕКСТ ПОСТА</label>
-            <div className="relative border border-[#4AF626]/30 focus-within:border-[#4AF626] focus-within:shadow-[0_0_10px_rgba(74,246,38,0.1)] transition-all bg-[#4AF626]/5">
-              
-              {/* Шапка "редактора" */}
-              <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#4AF626]/20 bg-[#4AF626]/10 text-[9px] text-[#4AF626]/70 font-bold uppercase tracking-widest select-none">
-                 <span>[ nano editor v2.0 ]</span>
-                 <span>UTF-8</span>
-              </div>
-              
-              <textarea 
-                name="content" 
-                required 
-                rows={12} 
-                placeholder="Type your message here..."
-                className="w-full bg-transparent p-4 text-sm text-[#4AF626] outline-none resize-y placeholder:text-[#4AF626]/30 leading-relaxed" 
-              />
-            </div>
+            <textarea 
+              name="content" 
+              required 
+              rows={10} 
+              placeholder="Текст поста..."
+              className="w-full bg-[#272729]/50 border border-[#343536] hover:border-gray-500 focus:border-gray-300 focus:bg-[#272729] rounded-md p-3 text-sm text-gray-200 placeholder-gray-500 outline-none transition-colors resize-y leading-relaxed" 
+            />
           </div>
 
-          {/* Теги */}
+          {/* Поле: Теги */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-2 uppercase tracking-widest">ТЕГИ (разделенные запятой)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-3 text-[#4AF626]/50 font-bold">#</span>
-              <input 
-                type="text" 
-                name="tags" 
-                placeholder="tech, news, code..."
-                className="w-full bg-[#4AF626]/5 border border-[#4AF626]/30 p-3 pl-8 text-sm text-[#4AF626] focus:border-[#4AF626] focus:shadow-[0_0_10px_rgba(74,246,38,0.1)] outline-none transition-all placeholder:text-[#4AF626]/30" 
-              />
-            </div>
+            <input 
+              type="text" 
+              name="tags" 
+              placeholder="Теги (через запятую, например: tech, news, games)"
+              className="w-full bg-transparent border border-[#343536] hover:border-gray-500 focus:border-gray-300 rounded-md p-3 text-sm text-gray-200 placeholder-gray-500 outline-none transition-colors" 
+            />
           </div>
 
-          {/* Кнопка отправки */}
-          <div className="flex justify-end pt-6 border-t border-[#4AF626]/20">
+          {/* Панель кнопок (Отмена / Опубликовать) */}
+          <div className="flex items-center justify-end pt-4 gap-3">
+            <Link 
+              href="/" 
+              className="px-4 py-2 text-sm font-semibold text-gray-400 hover:text-gray-200 transition"
+            >
+              Отмена
+            </Link>
             <button 
               type="submit" 
-              className="border border-[#4AF626] bg-[#0A0A0A] text-[#4AF626] hover:bg-[#4AF626] hover:text-[#0A0A0A] hover:shadow-[0_0_15px_rgba(74,246,38,0.5)] px-8 py-3 text-xs font-bold tracking-widest transition-all uppercase"
+              className="bg-gray-200 hover:bg-white text-black px-6 py-2 text-sm font-bold rounded-full transition shadow-sm"
             >
-              [ ОПУБЛИКОВАТЬ ]
+              Опубликовать
             </button>
           </div>
 
         </form>
       </div>
+
+      {/* Небольшая подсказка по правилам под формой */}
+      <div className="mt-6 bg-[#272729]/50 border border-[#343536] rounded-md p-4 text-xs text-gray-400 space-y-2">
+        <p className="font-semibold text-gray-300 mb-1">Правила публикации:</p>
+        <p>1. Убедитесь, что заголовок отражает суть поста.</p>
+        <p>2. Будьте вежливы и уважайте других пользователей.</p>
+        <p>3. Используйте подходящие теги для лучшего поиска.</p>
+      </div>
+
     </div>
   );
 }

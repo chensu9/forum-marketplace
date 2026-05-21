@@ -13,78 +13,87 @@ export default async function MarketPage() {
   });
 
   return (
-    <div className="max-w-[1200px] mx-auto space-y-8 font-mono">
+    <div className="max-w-[1200px] mx-auto px-4 py-8 w-full">
       
-      {/* CLI Шапка Маркета (Теперь выровнена жестко влево) */}
-      <div className="border border-[#4AF626]/30 bg-[#0A0A0A]/80 p-6 shadow-[0_0_15px_rgba(74,246,38,0.03)] flex flex-col md:flex-row justify-between items-start gap-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-8 h-8 border-r-4 border-t-4 border-[#4AF626]/20"></div>
-        
-        <div className="text-left flex-1">
-          <h2 className="text-2xl font-bold text-white text-glow mb-2 uppercase tracking-wider">~/market</h2>
-          <p className="text-xs text-[#4AF626]/60 font-bold">
-            Статус: <span className="text-[#4AF626] animate-pulse">ONLINE</span> | Защита активипрована | Всегда проверяйте репутацию продавца перед покупкой
+      {/* Шапка Маркета */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-100">Маркетплейс</h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Покупайте и продавайте товары безопасно.
           </p>
         </div>
         
-        <div className="flex flex-wrap gap-4 text-sm font-bold relative z-10 w-full md:w-auto">
-          <Link href="/market/orders" className="border border-[#4AF626]/50 text-[#4AF626] px-6 py-2 hover:bg-[#4AF626]/10 transition text-center flex-1 md:flex-none uppercase">
-            [ Мои заказы ]
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/market/orders" className="bg-[#272729] hover:bg-[#343536] text-gray-200 text-sm font-semibold px-4 py-2 rounded-full transition border border-[#343536]">
+            Мои заказы
           </Link>
-          <Link href="/market/create" className="bg-[#4AF626] text-[#0A0A0A] px-6 py-2 hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.8)] transition text-center flex-1 md:flex-none uppercase">
-            &gt; Создать листинг
+          <Link href="/market/create" className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-full transition flex items-center gap-2 shadow-sm">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Создать объявление
           </Link>
         </div>
       </div>
 
       {/* Сетка товаров */}
       {listings.length === 0 ? (
-        <div className="text-center text-[#4AF626]/50 py-16 border border-[#4AF626]/30 border-dashed text-lg">
-          В МАРКЕТЕ ЕЩЁ НЕТ АКТИВНЫХ ЛИСТИНГОВ
+        <div className="bg-[#1A1A1B] border border-[#343536] rounded-md py-16 text-center text-gray-500 text-sm">
+          В маркете пока нет активных объявлений.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {listings.map((listing) => (
-            <div key={listing.id} className="border border-[#4AF626]/30 bg-[#0A0A0A]/60 hover:border-[#4AF626] hover:shadow-[0_0_15px_rgba(74,246,38,0.1)] transition-all group flex flex-col relative overflow-hidden">
+            <div key={listing.id} className="bg-[#1A1A1B] border border-[#343536] hover:border-gray-500 rounded-md transition-colors group flex flex-col overflow-hidden shadow-sm hover:shadow-md">
               
-              <div className="absolute top-2 right-2 text-[10px] text-[#4AF626]/80 bg-[#0A0A0A]/90 px-1 border border-[#4AF626]/30 z-10">
-                ID:{listing.id.slice(0, 5)}
-              </div>
-
               <Link href={`/market/${listing.id}`} className="flex flex-col flex-grow">
                 
-                {/* ВЫВОД КАРТИНКИ ИЛИ ЗАГЛУШКИ */}
-                <div className="h-40 border-b border-[#4AF626]/30 flex items-center justify-center text-3xl group-hover:bg-[#4AF626]/5 transition overflow-hidden relative">
-                  {/* @ts-ignore - игнорируем ошибку TS, пока схема не сгенерируется заново */}
+                {/* Зона картинки */}
+                <div className="h-44 sm:h-48 bg-[#272729] border-b border-[#343536] flex items-center justify-center relative overflow-hidden">
+                  {/* @ts-ignore */}
                   {listing.imageUrl ? (
                     <img 
                       src={listing.imageUrl as string} 
                       alt={listing.title} 
-                      className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                     />
                   ) : (
-                    <span className="grayscale opacity-50 text-[#4AF626] tracking-widest text-sm font-bold">[ NO_IMG ]</span>
+                    // Иконка-заглушка, если нет картинки
+                    <svg className="w-12 h-12 text-[#343536]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                   )}
+                  {/* Бейдж ID */}
+                  <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-gray-300 text-[10px] px-2 py-1 rounded font-mono border border-white/10">
+                    #{listing.id.slice(0, 5)}
+                  </div>
                 </div>
                 
+                {/* Текст и цена */}
                 <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="font-bold text-[#4AF626] group-hover:text-white group-hover:text-glow transition mb-4 leading-snug line-clamp-2">
+                  <h3 className="font-semibold text-gray-200 group-hover:text-blue-400 transition-colors mb-3 line-clamp-2 text-sm leading-snug">
                     {listing.title}
                   </h3>
-                  <p className="text-white font-bold mt-auto text-lg text-glow">
-                    VAL: {listing.price} RUB
-                  </p>
+                  <div className="mt-auto">
+                    <span className="text-lg font-bold text-gray-100">
+                      {listing.price} ₽
+                    </span>
+                  </div>
                 </div>
               </Link>
 
-              {/* Футер карточки */}
-              <div className="p-3 border-t border-[#4AF626]/20 flex justify-between items-center text-[10px] bg-[#4AF626]/5">
-                <Link href={`/profile/${listing.seller.username}`} className="text-[#4AF626]/70 hover:text-white transition uppercase truncate max-w-[100px]">
-                  usr: {listing.seller.username}
+              {/* Подвал карточки: Информация о продавце */}
+              <div className="px-4 py-3 border-t border-[#343536] flex items-center justify-between bg-[#272729]/30">
+                <Link href={`/profile/${listing.seller.username}`} className="flex items-center gap-2 hover:opacity-80 transition max-w-[70%]">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-gray-600 to-gray-500 shrink-0 flex items-center justify-center text-[9px] font-bold text-white uppercase">
+                    {listing.seller.username.charAt(0)}
+                  </div>
+                  <span className="text-xs text-gray-400 truncate font-medium hover:underline">
+                    {listing.seller.username}
+                  </span>
                 </Link>
                 <RoleBadge role={listing.seller.role} />
-                <Link href={`/market/${listing.id}`} className="text-[#4AF626] hover:text-white transition font-bold tracking-widest shrink-0">
-                  [ VIEW ]
-                </Link>
               </div>
 
             </div>

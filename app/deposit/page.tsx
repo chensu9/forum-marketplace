@@ -14,24 +14,34 @@ export default async function DepositPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto font-mono space-y-6">
-      <Link href="/" className="inline-block text-[#4AF626]/60 hover:text-white hover:text-glow transition mb-2 font-bold text-[11px]">
-        &lt; Вернуться в меню
+    <div className="max-w-xl mx-auto px-4 py-8">
+      
+      {/* Кнопка назад */}
+      <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition text-sm font-medium mb-6">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Вернуться на главную
       </Link>
 
-      <div className="border border-[#4AF626]/50 bg-[#0A0A0A]/90 p-8 shadow-[0_0_20px_rgba(74,246,38,0.1)] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-[#4AF626]/30"></div>
-
-        <h1 className="text-2xl font-bold text-white text-glow uppercase tracking-widest mb-2 flex items-center gap-3">
-          ~// Пополнить баланс
-        </h1>
-        <p className="text-[#4AF626]/60 text-xs mb-8 uppercase tracking-widest border-b border-[#4AF626]/20 pb-4">
-          Юзер: <span className="text-white">{user?.username}</span> | БАЛАНС: <span className="text-[#4AF626] font-bold">{user?.balance.toFixed(2)} RUB</span>
-        </p>
+      <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-6 sm:p-8 shadow-sm">
+        <h1 className="text-xl font-bold text-gray-100 mb-6">Пополнение баланса</h1>
+        
+        {/* Инфо-блок с балансом */}
+        <div className="bg-[#272729] rounded-md p-4 mb-6 border border-[#343536] flex justify-between items-center">
+          <div>
+            <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Пользователь</p>
+            <p className="text-gray-200 font-medium">{user?.username}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Текущий баланс</p>
+            <p className="text-green-500 font-bold text-lg">{user?.balance.toFixed(2)} ₽</p>
+          </div>
+        </div>
 
         <form action={addFunds} className="space-y-6">
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 uppercase tracking-widest mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Сумма пополнения (RUB)
             </label>
             <input
@@ -40,21 +50,22 @@ export default async function DepositPage() {
               min="1"
               step="1"
               required
-              placeholder="0.00"
-              className="w-full bg-[#0A0A0A] border border-[#4AF626]/30 focus:border-[#4AF626] text-2xl text-[#4AF626] font-bold p-4 outline-none transition-colors placeholder:text-[#4AF626]/20"
+              placeholder="0"
+              className="w-full bg-[#272729] border border-[#343536] focus:border-gray-400 focus:bg-[#1A1A1B] rounded-md p-3 text-gray-100 outline-none transition-colors"
             />
           </div>
 
-          <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 text-xs text-yellow-500/80 uppercase tracking-widest leading-relaxed">
-            <span className="font-bold text-yellow-500 block mb-1">ПРЕДУПРЕЖДЕНИЕ:</span>
-            Это тестовая функция, которая просто добавляет деньги к вашему балансу без реальных транзакций. Используйте с осторожностью и не злоупотребляйте.
+          {/* Предупреждение */}
+          <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-md text-sm text-yellow-500/80">
+            <p className="font-bold mb-1">Тестовый режим</p>
+            <p>Эта функция носит демонстрационный характер и добавляет средства без проведения реальных платежей.</p>
           </div>
 
           <button 
             type="submit"
-            className="w-full border border-[#4AF626] text-[#4AF626] hover:bg-[#4AF626] hover:text-[#0A0A0A] px-6 py-4 font-bold uppercase tracking-widest transition-all text-sm shadow-[0_0_15px_rgba(74,246,38,0.1)]"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-full transition shadow-sm text-sm"
           >
-            [ ПОПОЛНИТЬ БАЛАНС ]
+            Пополнить баланс
           </button>
         </form>
       </div>

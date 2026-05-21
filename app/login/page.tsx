@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-// Раскомментируй эту строку, если используешь NextAuth для входа:
- import { signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,7 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Останавливаем перезагрузку страницы и попадание пароля в URL
+    e.preventDefault(); 
     setError("");
     setIsLoading(true);
 
@@ -21,90 +20,100 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-    
       const res = await signIn("credentials", {
         email,
         password,
-        redirect: false, // чтобы мы сами могли обработать ошибку
+        redirect: false,
       });
 
       if (res?.error) {
-        setError("ACCESS_DENIED: Invalid credentials");
+        setError("Неверный email или пароль");
       } else {
-        router.push("/"); // Перекидываем на главную
-        router.refresh(); // Обновляем данные (чтобы появился ник в хедере)
+        router.push("/"); 
+        router.refresh(); 
       }
       
     } catch (err) {
-      setError("CRITICAL_ERR: Сервер не отвечает");
+      setError("Ошибка сервера. Попробуйте позже.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh] font-mono">
-      <div className="w-full max-w-md border border-[#4AF626]/50 bg-[#0A0A0A]/80 p-8 shadow-[0_0_20px_rgba(74,246,38,0.05)] relative overflow-hidden">
+    <div className="flex items-center justify-center min-h-[75vh] px-4">
+      <div className="w-full max-w-md bg-[#1A1A1B] border border-[#343536] rounded-xl p-8 shadow-lg">
         
-        <div className="absolute top-0 left-0 w-full h-1 bg-[#4AF626]/30"></div>
-        <div className="absolute top-4 right-4 text-[#4AF626]/30 text-xs">SYS_AUTH</div>
+        {/* Шапка формы */}
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-full flex items-center justify-center font-bold text-2xl text-white mx-auto mb-4 shadow-sm">
+            N
+          </div>
+          <h1 className="text-2xl font-bold text-gray-100">
+            С возвращением
+          </h1>
+          <p className="text-gray-400 text-sm mt-2">
+            Войдите в свой аккаунт Nexus
+          </p>
+        </div>
 
-        <h1 className="text-2xl font-bold text-white text-glow mb-2 uppercase tracking-widest">
-          ~// auth.exe
-        </h1>
-        <p className="text-[#4AF626]/60 text-xs mb-6 uppercase tracking-widest">
-          STATUS: <span className="text-red-500 font-bold text-glow">LOCKED</span> | Identify yourself
-        </p>
-
-        {/* Вывод ошибки в терминальном стиле */}
+        {/* Вывод ошибки */}
         {error && (
-          <div className="mb-6 p-3 border border-red-500/50 bg-red-500/10 text-red-500 text-xs font-bold tracking-widest animate-pulse">
-            &gt; ERR: {error}
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-md text-red-400 text-sm text-center">
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Поле Email */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-1 uppercase tracking-widest">USER_ID / EMAIL</label>
-            <div className="relative group">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4AF626]/50">&gt;</span>
-              <input 
-                type="email" 
-                name="email"
-                required
-                autoComplete="email"
-                className="w-full bg-[#4AF626]/5 border border-[#4AF626]/30 p-3 pl-8 text-[#4AF626] focus:border-[#4AF626] focus:shadow-[0_0_10px_rgba(74,246,38,0.1)] outline-none transition-all" 
-                placeholder="enter_credentials..." 
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+            <input 
+              type="email" 
+              name="email"
+              required
+              autoComplete="email"
+              className="w-full bg-[#272729] border border-[#343536] hover:border-gray-500 focus:border-gray-300 focus:bg-[#1A1A1B] rounded-md p-3 text-gray-100 placeholder-gray-500 outline-none transition-colors" 
+              placeholder="you@example.com" 
+            />
           </div>
 
+          {/* Поле Пароля */}
           <div>
-            <label className="block text-[10px] text-[#4AF626]/70 mb-1 uppercase tracking-widest">PASSWORD_KEY</label>
-            <div className="relative group">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4AF626]/50">&gt;</span>
-              <input 
-                type="password" 
-                name="password"
-                required
-                autoComplete="current-password"
-                className="w-full bg-[#4AF626]/5 border border-[#4AF626]/30 p-3 pl-8 text-[#4AF626] focus:border-[#4AF626] focus:shadow-[0_0_10px_rgba(74,246,38,0.1)] outline-none transition-all" 
-                placeholder="**********" 
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">Пароль</label>
+            <input 
+              type="password" 
+              name="password"
+              required
+              autoComplete="current-password"
+              className="w-full bg-[#272729] border border-[#343536] hover:border-gray-500 focus:border-gray-300 focus:bg-[#1A1A1B] rounded-md p-3 text-gray-100 placeholder-gray-500 outline-none transition-colors" 
+              placeholder="••••••••" 
+            />
           </div>
 
+          {/* Кнопка войти */}
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full border border-[#4AF626] bg-[#0A0A0A] text-[#4AF626] hover:bg-[#4AF626] hover:text-[#0A0A0A] disabled:opacity-50 disabled:cursor-not-allowed py-3 text-sm font-bold tracking-widest transition-all uppercase"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed py-3 rounded-md text-sm font-bold transition-colors mt-2 flex justify-center items-center h-12 shadow-sm"
           >
-            {isLoading ? "[ PROCESSING... ]" : "[ INITIATE_SESSION ]"}
+            {isLoading ? (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              "Войти в систему"
+            )}
           </button>
         </form>
 
-        <div className="mt-6 border-t border-[#4AF626]/20 pt-4 text-center text-xs text-[#4AF626]/50">
-          GUEST_ENTITY? <Link href="/register" className="text-white text-glow hover:text-[#4AF626] transition tracking-widest ml-1">RUN register.exe</Link>
+        {/* Ссылка на регистрацию */}
+        <div className="mt-6 pt-6 border-t border-[#343536] text-center text-sm text-gray-400">
+          Нет аккаунта?{" "}
+          <Link href="/register" className="text-blue-500 hover:text-blue-400 font-semibold transition-colors">
+            Зарегистрироваться
+          </Link>
         </div>
       </div>
     </div>

@@ -1,33 +1,39 @@
 import type { Metadata } from "next";
-import "@uploadthing/react/styles.css";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { auth } from "@/auth";
+
 import GlobalHeader from "@/components/global-header";
-import BanGuard from "@/components/auth/ban-guard";
-import UnreadCounter from "@/components/messages/unread-counter";
+import BanGuard from "@/components/auth/ban-guard"; // Проверь, правильный ли здесь путь к твоему BanGuard
+import { auth } from "@/auth";
+
+// Инициализируем современный шрифт с поддержкой кириллицы
+const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  title: "hatehatehateforum | CLI",
-  description: "Terminal based forum",
+  title: "Nexus | HHHforum",
+  description: "Современный форум",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
 
   return (
     <html lang="ru">
-      <BanGuard>
-      <body className="bg-[#0A0A0A] text-[#4AF626] font-mono selection:bg-[#4AF626] selection:text-[#0A0A0A] antialiased min-h-screen flex flex-col crt-overlay">
-        
-        <GlobalHeader session={session} />
-
-        {/* ДОБАВЛЕНО max-w-[1600px] mx-auto, чтобы контент не растягивался на ульра-широких мониторах */}
-        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 py-6 relative z-10">
-          {children}
-        </main>
-
+      <body className={`${inter.className} bg-[#030303] text-gray-200 antialiased min-h-screen`}>
+        <BanGuard>
+          {/* Глобальная шапка */}
+          <GlobalHeader />
+          
+          {/* Основной контент страниц */}
+          <main className="w-full">
+            {children}
+          </main>
+        </BanGuard>
       </body>
-      </BanGuard>
     </html>
   );
 }
