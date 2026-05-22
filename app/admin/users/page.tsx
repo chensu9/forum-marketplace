@@ -21,10 +21,10 @@ export default async function AdminUsersPage() {
       
       <div className="flex justify-between items-end mb-2">
         <Link href="/admin" className="text-red-500/60 hover:text-red-500 hover:text-glow transition font-bold text-[11px]">
-          &lt; ABORT_TO_COMMAND_CENTER
+          &lt; ВЕРНУТСЯ В АДМИНКУ
         </Link>
         <div className="text-[10px] text-red-500/50 tracking-widest uppercase">
-          SECURE_CONNECTION: ESTABLISHED
+          Защещённый_Узел: {currentUser.username}
         </div>
       </div>
 
@@ -32,20 +32,20 @@ export default async function AdminUsersPage() {
         <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-red-500/30"></div>
 
         <h1 className="text-xl font-bold text-red-500 text-glow uppercase tracking-widest mb-2">
-          [ MODULE: USER_CONTROL ]
+          [ УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ]
         </h1>
         <p className="text-red-500/60 text-xs mb-8 uppercase tracking-widest">
-          TOTAL_NODES_INDEXED: {users.length}
+          ВСЕГО ПОЛЬЗОВАТЕЛЕЙ: {users.length}
         </p>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-[#4AF626]">
             <thead className="text-[10px] uppercase text-red-500/60 border-b border-red-500/30">
               <tr>
-                <th className="pb-3 font-bold tracking-widest">NODE_ID</th>
-                <th className="pb-3 font-bold tracking-widest">Username</th>
-                <th className="pb-3 font-bold tracking-widest">Current_Role</th>
-                <th className="pb-3 font-bold tracking-widest text-right">Actions</th>
+                <th className="pb-3 font-bold tracking-widest">ID</th>
+                <th className="pb-3 font-bold tracking-widest">Никнейм</th>
+                <th className="pb-3 font-bold tracking-widest">Роль</th>
+                <th className="pb-3 font-bold tracking-widest text-right">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-red-500/10">
@@ -57,7 +57,7 @@ export default async function AdminUsersPage() {
                       {user.username}
                     </Link>
                     <RoleBadge role={user.role} />
-                    {user.isBanned && <span className="ml-2 text-[9px] text-red-500 border border-red-500 px-1 uppercase animate-pulse">[ BANNED ]</span>}
+                    {user.isBanned && <span className="ml-2 text-[9px] text-red-500 border border-red-500 px-1 uppercase animate-pulse">[ ЗАБАНЕН ]</span>}
                   </td>
                   <td className="py-4 pr-4">
                     <span className={`text-[10px] font-bold uppercase ${user.role === 'ADMIN' ? 'text-red-500' : user.role === 'MODERATOR' ? 'text-yellow-500' : 'text-[#4AF626]'}`}>
@@ -71,14 +71,14 @@ export default async function AdminUsersPage() {
                       {user.role !== "USER" && (
                         <form action={async () => { "use server"; await updateUserRole(user.id, "USER"); }}>
                           <button className="text-[9px] border border-[#4AF626]/30 text-[#4AF626] px-2 py-1 hover:bg-[#4AF626] hover:text-[#0A0A0A] font-bold uppercase transition">
-                            [ SET_USER ]
+                            [ УБРАТЬ_ПРАВА ]
                           </button>
                         </form>
                       )}
                       {user.role !== "MODERATOR" && (
                         <form action={async () => { "use server"; await updateUserRole(user.id, "MODERATOR"); }}>
                           <button className="text-[9px] border border-yellow-500/30 text-yellow-500 px-2 py-1 hover:bg-yellow-500 hover:text-[#0A0A0A] font-bold uppercase transition">
-                            [ SET_MOD ]
+                            [ НАЗНАЧИТЬ_МОДЕРАТОРОМ ]
                           </button>
                         </form>
                       )}

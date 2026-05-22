@@ -1,8 +1,10 @@
+// ==========================================
 // 1. НАСТРОЙКИ PRISMA
+// ==========================================
 generator client {
   provider        = "prisma-client-js"
   // Эта настройка нужна для работы с адаптером PostgreSQL в Prisma 7+
-  previewFeatures = ["driverAdapters"] 
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -13,7 +15,6 @@ datasource db {
 // ==========================================
 // 2. ENUMS (Перечисления статусов и ролей)
 // ==========================================
-
 enum Role {
   USER
   VIP
@@ -23,53 +24,57 @@ enum Role {
 }
 
 enum OrderStatus {
-  PENDING       // Ожидает подтверждения
-  IN_PROGRESS   // В работе
-  COMPLETED     // Завершён
-  CANCELLED     // Отменён
+  PENDING // Ожидает подтверждения
+  IN_PROGRESS // В работе
+  COMPLETED // Завершён
+  CANCELLED // Отменён
 }
 
 // ==========================================
 // 3. ПОЛЬЗОВАТЕЛИ
 // ==========================================
-
 model User {
-  id                String    @id @default(cuid())
+  id                String   @id @default(cuid())
   name              String?
-  username          String    @unique
-  email             String    @unique
+  username          String   @unique
+  email             String   @unique
   password          String?
-  image             String?
-  bio               String?   // Описание профиля
-  profileBackground String?
-  reputation        Int       @default(0) // Репутация (лайки + посты)
-  role              Role      @default(USER)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  reports           Report[]
-  isBanned          Boolean   @default(false) // НОВОЕ ПОЛЕ: По умолчанию никто не забанен
-  balance           Float     @default(0)
+  image             String? // Ссылка на аватарку
+  bio               String? // Описание профиля
+  profileBackground String? // Ссылка на фон профиля
+  reputation        Int      @default(0) // Репутация (лайки + посты)
+  role              Role     @default(USER)
+  balance           Float    @default(0)
+  isBanned          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // --- СВЯЗИ (Relations) ---
   // Форум
-  posts         Post[]    @relation("UserPosts")
-  comments      Comment[] @relation("UserComments")
-  likedPosts    Post[]    @relation("PostLikes") // Посты, которые лайкнул юзер
+  posts         Post[]        @relation("UserPosts")
+  comments      Comment[]     @relation("UserComments")
+  likedPosts    Post[]        @relation("PostLikes") // Посты, которые лайкнул юзер
+  dislikedPosts Post[]        @relation("PostDislikes") // Посты, которые дизлайкнул юзер
+  commentLikes  CommentLike[]
 
   // Маркетплейс
-  listings      Listing[] @relation("UserListings")
-  ordersBought  Order[]   @relation("BuyerOrders")
-  ordersSold    Order[]   @relation("SellerOrders")
+  listings     Listing[] @relation("UserListings")
+  ordersBought Order[]   @relation("BuyerOrders")
+  ordersSold   Order[]   @relation("SellerOrders")
 
-  // Личные сообщения
-  messagesSent     Message[] @relation("SentMessages")
-  messagesReceived Message[] @relation("ReceivedMessages")
+  // Жалобы (Репорты)
+  reportsSent     Report[] @relation("ReportSender")
+  reportsReceived Report[] @relation("ReportedUser")
+
+  // Личные сообщения и Уведомления
+  messagesSent     Message[]      @relation("SentMessages")
+  messagesReceived Message[]      @relation("ReceivedMessages")
+  notifications    Notification[]
 }
 
 // ==========================================
 // 4. ФОРУМ (Посты, Теги, Комментарии)
 // ==========================================
-
 model Post {
   id        String   @id @default(cuid())
   title     String
@@ -81,19 +86,20 @@ model Post {
   reports   Report[]
 
   // Автор поста
-  authorId  String
-  author    User     @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User   @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
 
-  // Теги, комментарии и лайки
-  tags      Tag[]
-  comments  Comment[]
-  likedBy   User[]   @relation("PostLikes")
+  // Теги, комментарии и система голосования
+  tags       Tag[]
+  comments   Comment[]
+  likedBy    User[]    @relation("PostLikes")
+  dislikedBy User[]    @relation("PostDislikes") // <--- ИСПРАВЛЕНО И ПЕРЕНЕСЕНО СЮДА
 }
 
 model Tag {
   id    String @id @default(cuid())
   name  String @unique
-  posts Post[]
+  posts Post[] // Связь многие-ко-многим с постами
 }
 
 model Comment {
@@ -101,98 +107,132 @@ model Comment {
   content   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  reports   Report[]
 
   // Автор комментария
-  authorId  String
-  author    User     @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User   @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
 
   // Пост, к которому относится комментарий
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   // Вложенные комментарии (Ответы на комментарии)
-  parentId  String?
-  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   Comment[] @relation("CommentReplies")
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  // Лайки к комментариям
+  likedBy CommentLike[]
 }
 
 // ==========================================
 // 5. МАРКЕТПЛЕЙС (Объявления и Заказы)
 // ==========================================
-
 model Listing {
   id          String   @id @default(cuid())
   title       String
   description String   @db.Text
-  price       Float    // Цена услуги/товара
+  price       Float // Цена услуги/товара
   images      String[] // Ссылки на картинки
-  imageUrl    String?  // <--- ИСПРАВЛЕННОЕ ПОЛЕ (Картинка товара)
+  imageUrl    String? // Локальный путь сохранения картинки товара
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Продавец
-  sellerId    String
-  seller      User     @relation("UserListings", fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId String
+  seller   User   @relation("UserListings", fields: [sellerId], references: [id], onDelete: Cascade)
 
   // Заказы по этому объявлению
-  orders      Order[]
+  orders Order[]
 }
 
 model Order {
   id        String      @id @default(cuid())
-  price     Float       // Фиксируем цену на момент заказа (если продавец её изменит)
+  price     Float // Фиксируем цену на момент заказа
   status    OrderStatus @default(PENDING)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
   // Товар/Услуга
   listingId String
-  listing   Listing     @relation(fields: [listingId], references: [id])
+  listing   Listing @relation(fields: [listingId], references: [id])
 
   // Покупатель
-  buyerId   String
-  buyer     User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  buyerId String
+  buyer   User   @relation("BuyerOrders", fields: [buyerId], references: [id])
 
   // Продавец
-  sellerId  String
-  seller    User        @relation("SellerOrders", fields: [sellerId], references: [id])
+  sellerId String
+  seller   User   @relation("SellerOrders", fields: [sellerId], references: [id])
 }
 
 // ==========================================
 // 6. СИСТЕМА ЖАЛОБ (Репорты)
 // ==========================================
-
 model Report {
   id        String   @id @default(cuid())
-  reason    String   // Причина жалобы
+  reason    String
+  status    String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
   createdAt DateTime @default(now())
-  status    String   @default("PENDING") // Статусы: PENDING, RESOLVED, DISMISSED
 
-  // Связь с постом
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId    String
+  // Кто отправил жалобу
+  userId String
+  user   User   @relation("ReportSender", fields: [userId], references: [id], onDelete: Cascade)
 
-  // Связь с пользователем (кто пожаловался)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
+  // На пост (опционально)
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // На комментарий (опционально)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // На профиль пользователя (опционально)
+  targetUserId String?
+  targetUser   User?   @relation("ReportedUser", fields: [targetUserId], references: [id], onDelete: Cascade)
 }
 
 // ==========================================
 // 7. ЛИЧНЫЕ СООБЩЕНИЯ (Secure Comms)
 // ==========================================
-
 model Message {
-  id          String   @id @default(cuid())
-  content     String   @db.Text
-  isRead      Boolean  @default(false) // Прочитано или нет (для уведомлений)
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   // Кто отправил
-  senderId    String
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   // Кому отправили
-  receiverId  String
-  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+model CommentLike {
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+}
+
+// ==========================================
+// 8. СИСТЕМА УВЕДОМЛЕНИЙ
+// ==========================================
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String // Кому предназначено уведомление
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Связь с пользователем
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

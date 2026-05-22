@@ -84,3 +84,69 @@ export async function deletePost(postId: string) {
   revalidatePath("/");
   redirect("/");
 }
+
+// ==========================================
+// УНИВЕРСАЛЬНАЯ СИСТЕМА ГОЛОСОВАНИЯ (ЛАЙКИ / ДИЗЛАЙКИ)
+// ==========================================
+export async function handlePostVote(postId: string, voteType: "UPVOTE" | "DOWNVOTE") {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Необходимо войти в аккаунт");
+
+  const userId = session.user.id;
+
+  // Ищем пост и проверяем, лайкнул ли его или дизлайкнул пользователь уже
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    include: {
+      likedBy: { where: { id: userId }, select: { id: true } },
+      dislikedBy: { where: { id: userId }, select: { id: true } }
+    }
+  });
+
+  if (!post) throw new Error("Пост не найден");
+
+  const hasLiked = post.likedBy.length > 0;
+  const hasDisliked = post.dislikedBy.length > 0;
+
+  if (voteType === "UPVOTE") {
+    if (hasLiked) {
+      // Если лайк уже стоит — убираем его
+      await prisma.post.update({
+        where: { id: postId },
+        data: { likedBy: { disconnect: { id: userId } } }
+      });
+    } else {
+      // Иначе ставим лайк и принудительно убираем дизлайк (если он был)
+      await prisma.post.update({
+        where: { id: postId },
+        data: {
+          likedBy: { connect: { id: userId } },
+          dislikedBy: { disconnect: { id: userId } }
+        }
+      });
+    }
+  } 
+  
+  if (voteType === "DOWNVOTE") {
+    if (hasDisliked) {
+      // Если дизлайк уже стоит — убираем его
+      await prisma.post.update({
+        where: { id: postId },
+        data: { dislikedBy: { disconnect: { id: userId } } }
+      });
+    } else {
+      // Иначе ставим дизлайк и принудительно убираем лайк (если он был)
+      await prisma.post.update({
+        where: { id: postId },
+        data: {
+          dislikedBy: { connect: { id: userId } },
+          likedBy: { disconnect: { id: userId } }
+        }
+      });
+    }
+  }
+
+  // Обновляем кэш страниц, чтобы изменения отобразились у всех
+  revalidatePath("/");
+  revalidatePath(`/post/${postId}`);
+}

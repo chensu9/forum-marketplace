@@ -20,8 +20,8 @@ export default function CyberModal({
   type = "warning",
   onConfirm,
   onCancel,
-  confirmText = "[ ПОДТВЕРДИТЬ ]",
-  cancelText = "[ ОТМЕНА ]"
+  confirmText = "Подтвердить",
+  cancelText = "Отмена"
 }: CyberModalProps) {
   
   // Блокируем скролл страницы, когда модалка открыта
@@ -33,39 +33,44 @@ export default function CyberModal({
 
   if (!isOpen) return null;
 
-  const colors = {
-    warning: "border-yellow-500 text-yellow-500 bg-yellow-500/10",
-    danger: "border-red-500 text-red-500 bg-red-500/10",
-    info: "border-[#4AF626] text-[#4AF626] bg-[#4AF626]/10"
+  // Цветовые схемы под новый дизайн
+  const badgeColors = {
+    warning: "bg-yellow-500/10 text-yellow-500 border-yellow-500/30",
+    danger: "bg-red-500/10 text-red-500 border-red-500/30",
+    info: "bg-blue-500/10 text-blue-400 border-blue-500/30"
   };
 
-  const activeColor = colors[type];
+  const buttonColors = {
+    warning: "bg-yellow-600 hover:bg-yellow-500 text-white",
+    danger: "bg-red-600 hover:bg-red-500 text-white",
+    info: "bg-blue-600 hover:bg-blue-500 text-white"
+  };
+
+  const activeBadge = badgeColors[type];
+  const activeButton = buttonColors[type];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0A]/80 backdrop-blur-sm p-4 font-mono">
-      <div className={`relative w-full max-w-md border ${activeColor} bg-[#0A0A0A] p-6 shadow-[0_0_30px_rgba(0,0,0,0.5)]`}>
-        {/* Декоративные углы */}
-        <div className={`absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 ${activeColor.split(' ')[0]}`}></div>
-        <div className={`absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 ${activeColor.split(' ')[0]}`}></div>
-
-        <h2 className="text-xl font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-          <span className="animate-pulse">_</span> {title}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A0A0B]/80 backdrop-blur-sm p-4">
+      <div className="relative w-full max-w-sm bg-[#1A1A1B] border border-[#343536] rounded-xl p-6 shadow-2xl">
+        
+        <h2 className="text-lg font-bold text-gray-100 mb-2 flex items-center gap-2">
+          {title}
         </h2>
         
-        <p className="text-sm opacity-80 mb-8 whitespace-pre-wrap">
+        <div className={`text-sm mb-6 p-3 rounded-md border ${activeBadge}`}>
           {message}
-        </p>
+        </div>
 
-        <div className="flex gap-4 justify-end">
+        <div className="flex gap-3 justify-end mt-4">
           <button 
             onClick={onCancel}
-            className="px-4 py-2 text-xs font-bold uppercase border border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-[#0A0A0A] transition"
+            className="px-4 py-2 text-sm font-semibold text-gray-400 hover:text-white hover:bg-[#272729] rounded-full transition"
           >
             {cancelText}
           </button>
           <button 
             onClick={onConfirm}
-            className={`px-4 py-2 text-xs font-bold uppercase border transition ${activeColor.split(' ')[0]} ${activeColor.split(' ')[1]} hover:bg-current hover:text-[#0A0A0A]`}
+            className={`px-6 py-2 text-sm font-bold rounded-full transition shadow-sm ${activeButton}`}
           >
             {confirmText}
           </button>

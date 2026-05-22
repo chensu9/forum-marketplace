@@ -5,6 +5,8 @@ import Link from "next/link";
 import ChatForm from "@/components/messages/chat-form";
 import ScrollToBottom from "@/components/messages/scroll-to-bottom";
 import RoleBadge from "@/components/user/role-badge";
+// Импортируем наш новый экшен репорта на юзера
+import { reportUser } from "@/lib/actions/user";
 
 export default async function ChatPage({ params }: { params: Promise<{ username: string }> }) {
   const session = await auth();
@@ -14,7 +16,7 @@ export default async function ChatPage({ params }: { params: Promise<{ username:
   
   const otherUser = await prisma.user.findUnique({
     where: { username: resolvedParams.username },
-    select: { id: true, username: true, role: true, reputation: true, createdAt: true, bio: true }
+    select: { id: true, username: true, role: true, reputation: true, createdAt: true, bio: true, image: true }
   });
 
   if (!otherUser) notFound();
@@ -37,6 +39,14 @@ export default async function ChatPage({ params }: { params: Promise<{ username:
     data: { isRead: true }
   });
 
+  // Функция-обработчик для отправки репорта (Server Action)
+  async function handleUserReport(formData: FormData) {
+    "use server";
+    const reason = formData.get("reason") as string;
+    const targetId = formData.get("targetUserId") as string;
+    await reportUser(targetId, reason);
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 w-full space-y-4">
       
@@ -50,16 +60,18 @@ export default async function ChatPage({ params }: { params: Promise<{ username:
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        {/* ======================================= */}
-        {/* ЛЕВАЯ ЧАСТЬ: САМ ЧАТ (3 колонки)          */}
-        {/* ======================================= */}
+        {/* САМ ЧАТ */}
         <div className="lg:col-span-3 bg-[#1A1A1B] border border-[#343536] rounded-md flex flex-col h-[75vh] shadow-sm overflow-hidden">
           
           {/* Шапка чата */}
           <div className="bg-[#272729] border-b border-[#343536] px-6 py-3 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-tr from-gray-600 to-gray-500 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-sm">
-                {otherUser.username.charAt(0).toUpperCase()}
+              <div className="w-10 h-10 bg-gradient-to-tr from-gray-600 to-gray-500 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-sm overflow-hidden">
+                {otherUser.image ? (
+                  <img src={otherUser.image} alt={otherUser.username} className="w-full h-full object-cover" />
+                ) : (
+                  otherUser.username.charAt(0).toUpperCase()
+                )}
               </div>
               <div>
                 <div className="font-bold text-gray-100 flex items-center gap-2">
@@ -84,25 +96,15 @@ export default async function ChatPage({ params }: { params: Promise<{ username:
                 const isMe = msg.senderId === session.user?.id;
                 return (
                   <div key={msg.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
-                    <div 
-                      className={`max-w-[85%] sm:max-w-[70%] px-4 py-2.5 text-sm relative group
-                        ${isMe 
-                          ? "bg-blue-600 text-white rounded-2xl rounded-br-sm" 
-                          : "bg-[#272729] border border-[#343536] text-gray-100 rounded-2xl rounded-bl-sm"
-                        }`
-                      }
-                    >
-                      <div className="whitespace-pre-wrap break-words leading-relaxed">
-                        {msg.content}
-                      </div>
-                      <div className={`text-[10px] mt-1 text-right flex items-center justify-end gap-1
-                        ${isMe ? "text-blue-200" : "text-gray-500"}`
-                      }>
-                        {msg.createdAt.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
-                        {/* Иконка галочек (прочитано) */}
-                        {isMe && (
-                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                        )}
+                    <div className={`max-w-[85%] sm:max-w-[70%] px-3 py-1.5 text-sm relative group w-fit ${isMe ? "bg-blue-600 text-white rounded-2xl rounded-br-sm" : "bg-[#272729] border border-[#343536] text-gray-100 rounded-2xl rounded-bl-sm"}`}>
+                      <div className="flex items-end gap-2">
+                        <div className="whitespace-pre-wrap break-words leading-relaxed text-left">
+                          {msg.content}
+                        </div>
+                        <div className={`text-[10px] shrink-0 flex items-center gap-0.5 mb-0.5 ${isMe ? "text-blue-200" : "text-gray-500"}`}>
+                          {msg.createdAt.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                          {isMe && <svg className="w-3.5 h-3.5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -118,13 +120,15 @@ export default async function ChatPage({ params }: { params: Promise<{ username:
           </div>
         </div>
 
-        {/* ======================================= */}
-        {/* ПРАВАЯ ЧАСТЬ: ПРОФИЛЬ СОБЕСЕДНИКА        */}
-        {/* ======================================= */}
+        {/* ПРОФИЛЬ СОБЕСЕДНИКА СБОКУ */}
         <div className="lg:col-span-1 bg-[#1A1A1B] border border-[#343536] rounded-md p-6 h-fit lg:sticky lg:top-20 shadow-sm flex flex-col items-center text-center">
           
-          <div className="w-20 h-20 bg-gradient-to-tr from-gray-600 to-gray-500 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-4 shadow-inner">
-            {otherUser.username.charAt(0).toUpperCase()}
+          <div className="w-20 h-20 bg-gradient-to-tr from-gray-600 to-gray-500 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-4 shadow-inner overflow-hidden">
+            {otherUser.image ? (
+              <img src={otherUser.image} alt={otherUser.username} className="w-full h-full object-cover" />
+            ) : (
+              otherUser.username.charAt(0).toUpperCase()
+            )}
           </div>
           
           <h2 className="text-lg font-bold text-gray-100 flex items-center justify-center gap-2 w-full mb-1">
@@ -149,9 +153,25 @@ export default async function ChatPage({ params }: { params: Promise<{ username:
             </div>
           )}
 
-          <Link href={`/profile/${otherUser.username}`} className="w-full bg-gray-200 hover:bg-white text-black font-semibold py-2.5 rounded-full transition text-sm">
+          <Link href={`/profile/${otherUser.username}`} className="w-full bg-gray-200 hover:bg-white text-black font-semibold py-2.5 rounded-full transition text-sm mb-4 block">
             Открыть профиль
           </Link>
+
+          {/* === ДОБАВЛЕНО: ФОРМА ОТПРАВКИ ЖАЛОБЫ НА ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ === */}
+          <form action={handleUserReport} className="w-full bg-[#0A0A0B] border border-[#343536] rounded-xl p-3 flex flex-col gap-2">
+            <input type="hidden" name="targetUserId" value={otherUser.id} />
+            <input 
+              type="text" 
+              name="reason" 
+              placeholder="Причина жалобы (от 5 символов)..." 
+              required
+              className="w-full bg-[#272729] border border-[#343536] focus:border-gray-500 rounded-lg p-2 text-xs text-gray-200 placeholder-gray-500 outline-none transition-colors"
+            />
+            <button type="submit" className="w-full bg-[#272729] hover:bg-red-600/20 hover:text-red-400 text-gray-400 font-semibold py-1.5 rounded-lg text-xs transition border border-[#343536]">
+              Пожаловаться на юзера
+            </button>
+          </form>
+
         </div>
 
       </div>
