@@ -57,6 +57,8 @@ model User {
   dislikedPosts Post[]        @relation("PostDislikes") // Посты, которые дизлайкнул юзер
   commentLikes  CommentLike[]
 
+lastSeen          DateTime @default(now())
+
   // Маркетплейс
   listings     Listing[] @relation("UserListings")
   ordersBought Order[]   @relation("BuyerOrders")
