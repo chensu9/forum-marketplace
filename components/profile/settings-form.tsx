@@ -27,10 +27,9 @@ export default function SettingsForm({ initialUsername, initialBio }: SettingsFo
 
     // Запускаем серверный экшен в фоне
     startTransition(async () => {
-      const result = await updateProfile(formData);
+      const result = await updateProfile(formData) as any;
 
       if (result?.error) {
-        // Если сервер вернул ошибку - показываем её
         setError(result.error);
       } else if (result?.success) {
         // Если всё успешно - перекидываем на новый профиль
