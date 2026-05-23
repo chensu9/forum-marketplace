@@ -54,8 +54,8 @@ export default function SettingsForm({ initialUsername, initialBio }: SettingsFo
           Аватар профиля
         </label>
         <div className="bg-[#1A1A22] border border-gray-800 rounded-lg p-6 flex flex-col items-center justify-center border-dashed">
-          <UploadButton<OurFileRouter, "imageUploader">
-            endpoint="imageUploader"
+          <UploadButton<OurFileRouter, "backgroundCustomizer">
+            endpoint="backgroundCustomizer"
             onClientUploadComplete={(res) => {
               alert("Аватарка успешно загружена! Обновите страницу.");
               router.refresh(); // Обновляет данные на странице
